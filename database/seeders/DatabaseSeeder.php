@@ -2,8 +2,11 @@
 
 namespace Database\Seeders;
 
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+use Database\Seeders\LemariSeeder;
+use Database\Seeders\LokerSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -12,18 +15,43 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // \App\Models\User::factory(10)->create();
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        // ========== SEEDER UNTUK USER ==========
+        $this->call([
+            UserSeeder::class,
+            LemariLokerSeeder::class,
+            PengirimanBerkasSeeder::class,
+            ArsipSeeder::class,
+        ]);
 
-        // \App\Models\User::factory()->create([
-        //     'name' => 'Test User',
-        //     'email' => 'test@example.com',
-        // ]);
+        // Atau langsung buat user di sini (alternatif):
+        // $this->createUsers();
+        // Aktifkan kembali foreign key check
+        \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
-         \App\Models\User::factory()->create([
-             'name' => 'John',
-             'last_name' => 'Doe',
-             'password' => 'password',
-             'email' => 'test@example.com',
-         ]);
+        $this->command->info('🎉 Semua seeder berhasil dijalankan!');
+    }
+
+    /**
+     * Create users directly (alternatif method)
+     */
+    private function createUsers(): void
+    {
+        // User Admin
+        User::create([
+            'name' => 'Administrator',
+            'email' => 'admin@kanim.com',
+            'password' => Hash::make('admin123'),
+            'role' => 'admin',
+        ]);
+
+        // User Biasa
+        User::create([
+            'name' => 'User Biasa',
+            'email' => 'user@kanim.com',
+            'password' => Hash::make('user123'),
+            'role' => 'user',
+        ]);
+
     }
 }

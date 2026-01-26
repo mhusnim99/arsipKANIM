@@ -32,20 +32,14 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
 
     <!-- Scripts di atas sb-admin-2.min.js -->
-    <!-- jQuery (SUDAH BENAR) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-
-    <!-- Bootstrap 4 Bundle (INI YANG HILANG 🔥) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Core JavaScript -->
-    <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
     <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/js/bootstrap-datepicker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/locales/bootstrap-datepicker.id.min.js">
+    </script>
+
     <!-- Scripts SB Admin 2 -->
     <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
-    @yield('scripts')
 </head>
 
 <body id="page-top">
@@ -66,32 +60,11 @@
             <!-- Divider -->
             <hr class="sidebar-divider my-0">
 
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.dashboard') }}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>{{ __('Dashboard') }}</span>
-                </a>
-            </li>
-            <!-- Nav Item - Menerima Arsip -->
-            <li class="nav-item {{ request()->routeIs('admin.penerimaan-arsip.index') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.penerimaan-arsip.index') }}">
-                    <i class="fas fa-fw fa-inbox"></i>
-                    <span>{{ __('Menerima Arsip') }}</span>
-                </a>
-            </li>
-            <!-- Nav Item - Manajemen Lemari -->
-            <li class="nav-item {{ request()->routeIs('admin.manajemen-lemari.index') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.manajemen-lemari.index') }}">
-                    <i class="fas fa-fw fa-inbox"></i>
-                    <span>{{ __('Manajemen Lemari') }}</span>
-                </a>
-            </li>
-
-            <li class="nav-item {{ request()->routeIs('admin.arsip.index') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.arsip.index') }}">
-                    <i class="fas fa-fw fa-inbox"></i>
-                    <span>{{ __('Manajemen Arsip') }}</span>
+            <!-- Nav Item - cek-permohonan (Admin) -->
+            <li class="nav-item {{ request()->routeIs('user.pengiriman') ? 'active' : '' }}">
+                <a class="nav-link" href="{{ route('user.pengiriman') }}">
+                    <i class="fas fa-fw fa-file-alt"></i>
+                    <span>{{ __('Pengiriman Berkas') }}</span>
                 </a>
             </li>
 
@@ -115,11 +88,12 @@
                 <!-- Topbar -->
                 <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
 
+                    <!-- Sidebar Toggle (Topbar) -->
+                    <button id="sidebarToggleTop" class="btn btn-link d-md-none rounded-circle mr-3">
+                        <i class="fa fa-bars"></i>
+                    </button>
                     <!-- Topbar Navbar -->
                     <ul class="navbar-nav ml-auto">
-                        <div class="topbar-divider d-none d-sm-block"></div>
-
-                        <!-- Nav Item - User Information -->
                         <li class="nav-item dropdown no-arrow">
                             <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -132,12 +106,14 @@
                             <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
                                 aria-labelledby="userDropdown">
                                 <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
+                                <a class="dropdown-item" href="#" data-toggle="modal"
+                                    data-target="#logoutModal">
                                     <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
                                     {{ __('Logout') }}
                                 </a>
                             </div>
                         </li>
+
                     </ul>
 
                 </nav>
@@ -189,13 +165,12 @@
             </div>
         </div>
     </div>
-
+    @yield('scripts')
     <!-- Scripts -->
     <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
     <script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
     <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
     <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
-    @yield('scripts')
 </body>
 
 </html>
