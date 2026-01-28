@@ -142,16 +142,15 @@ class Lemari extends Model
     }
     public function syncStatus(): void
     {
-        if ($this->status === 'nonaktif') {
-            return;
-        }
+        if ($this->status === 'nonaktif') return;
 
-        $this->status = $this->jumlahArsip() >= $this->kapasitasTotalArsip()
-            ? 'penuh'
-            : 'aktif';
-
-        $this->save();
+        $this->update([
+            'status' => $this->jumlahArsip() >= $this->kapasitasTotalArsip()
+                ? 'penuh'
+                : 'aktif'
+        ]);
     }
+
     public function kapasitasTotalArsip(): int
     {
         return $this->lokers()->sum('kapasitas');

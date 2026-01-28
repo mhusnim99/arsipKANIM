@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
+use App\Services\LokerAllocator;
 
 class PenerimaanArsipController extends Controller
 {
@@ -87,17 +88,24 @@ class PenerimaanArsipController extends Controller
     public function terima(Request $request, $id)
     {
         $request->validate([
-            'lemari_id' => 'required|exists:lemaris,id',
-            'loker_id'  => 'required|exists:lokers,id',
+            'lemari_id' => 'nullable|exists:lemaris,id',
+            'loker_id'  => 'nullable|exists:lokers,id',
         ]);
 
         DB::transaction(function () use ($request, $id) {
 
             $pengiriman = PengirimanBerkas::lockForUpdate()->findOrFail($id);
-            $loker = Loker::lockForUpdate()->findOrFail($request->loker_id);
+            // $loker = $request->filled('loker_id')
+            //     ? Loker::lockForUpdate()->findOrFail($request->loker_id)
+            //     : LokerAllocator::pick();
 
-            if (! $loker->masihAdaSlot()) {
-                abort(422, 'Loker sudah penuh');
+            // if (! $loker) {
+            //     abort(422, 'Tidak ada loker tersedia');
+            // }
+            $loker = LokerAllocator::pick();
+
+            if (! $loker) {
+                abort(422, 'Tidak ada loker tersedia di seluruh lemari');
             }
 
             $nomorArsip = $loker->generateNomorArsip();

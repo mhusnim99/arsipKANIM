@@ -56,16 +56,15 @@ class Loker extends Model
      */
     public function syncStatus(): void
     {
-        if ($this->status === 'nonaktif') {
-            return;
-        }
+        if ($this->status === 'nonaktif') return;
 
-        if ($this->jumlahArsip() >= $this->kapasitas) {
-            $this->update(['status' => 'penuh']);
-        } else {
-            $this->update(['status' => 'aktif']);
-        }
+        $this->update([
+            'status' => $this->jumlahArsip() >= $this->kapasitas
+                ? 'penuh'
+                : 'aktif'
+        ]);
     }
+
 
     /* ================= DISPLAY ================= */
 

@@ -83,28 +83,13 @@
                             Kode Permohonan: <strong id="kodeTerima"></strong>
                         </div>
 
-                        <div class="form-group">
-                            <label>Lemari</label>
-                            <select id="lemari_id" name="lemari_id" class="form-control" required>
-                                <option value="">-- Pilih Lemari --</option>
-                                @foreach ($lemaris as $lemari)
-                                    <option value="{{ $lemari->id }}">
-                                        {{ $lemari->kode_lemari }} - {{ $lemari->nama_lemari }}
-                                    </option>
-                                @endforeach
-                            </select>
+                        <div class="alert alert-info">
+                            Lokasi penyimpanan arsip akan ditentukan otomatis oleh sistem
+                            berdasarkan lemari terlama dan loker yang masih tersedia.
                         </div>
-
-                        <div class="form-group">
-                            <label>Loker</label>
-                            <select id="loker_id" name="loker_id" class="form-control" required>
-                                <option value="">-- Pilih Loker --</option>
-                            </select>
-                        </div>
-
                         <div class="form-group">
                             <label>Nomor Arsip</label>
-                            <input type="text" id="nomor_arsip" name="nomor_arsip" class="form-control" readonly>
+                            <input type="text" id="nomor_arsip" name="nomor_arsip" value="Akan digenerate otomatis" class="form-control" readonly>
                         </div>
 
                         <div class="form-group">
