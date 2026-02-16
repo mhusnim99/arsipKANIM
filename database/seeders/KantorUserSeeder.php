@@ -1,0 +1,110 @@
+<?php
+
+namespace Database\Seeders;
+
+use App\Models\User;
+use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+
+class KantorUserSeeder extends Seeder
+{
+    public function run(): void
+    {
+        $users = [
+            [
+                'name'   => 'Admin',
+                'last_name' => 'TKIM',
+                'email'  => 'admin@arsip.com',
+                'password' => Hash::make('admin123'),
+                'role'   => 'admin',
+                'role' => 'admin',
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+                'kantor' => 'TKIM',
+            ],
+            [
+                'name'   => 'Petugas',
+                'last_name' => 'Kanim',
+                'email'  => 'kanim@arsip.com',
+                'password' => Hash::make('kanim123'),
+                'role' => 'user',
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+                'kantor' => 'Kanim',
+            ],
+            [
+                'name'   => 'Petugas',
+                'last_name' => 'ULP LTSA MPP Sidoarjo',
+                'email'  => 'mpp@arsip.com',
+                'password' => Hash::make('mpp123'),
+                'role' => 'user',
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+                'kantor' => 'ULP LTSA MPP Sidoarjo',
+            ],
+            [
+                'name'   => 'Petugas',
+                'last_name' => 'Immigration Lounge CIWO',
+                'email'  => 'ciwo@arsip.com',
+                'password' => Hash::make('ciwo123'),
+                'role' => 'user',
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+                'kantor' => 'Immgration Lounge CIWO',
+            ],
+            [
+                'name'   => 'Petugas',
+                'last_name' => 'ULP Bendul Merisi',
+                'email'  => 'bendul@arsip.com',
+                'password' => Hash::make('bendul123'),
+                'role' => 'user',
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+                'kantor' => 'ULP Bendul Merisi',
+            ],
+            [
+                'name'   => 'Petugas',
+                'last_name' => 'ULP Wiyung',
+                'email'  => 'wiyung@arsip.com',
+                'password' => Hash::make('wiyung123'),
+                'role' => 'user',
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+                'kantor' => 'ULP Wiyung',
+            ],
+            [
+                'name'   => 'Petugas',
+                'last_name' => 'ULP BG Junction',
+                'email'  => 'bgj@arsip.com',
+                'password' => Hash::make('bgj123'),
+                'role' => 'user',
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+                'kantor' => 'ULP BG Junction',
+            ],
+            [
+                'name'   => 'Petugas',
+                'last_name' => 'ULP Mojokerto',
+                'email'  => 'mjk@arsip.com',
+                'password' => Hash::make('mjk123'),
+                'role' => 'user',
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+                'kantor' => 'ULP Mojokerto',
+            ],
+        ];
+
+        foreach ($users as $user) {
+            User::create($user);
+        }
+    }
+}

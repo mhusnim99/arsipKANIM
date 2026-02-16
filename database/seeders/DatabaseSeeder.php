@@ -30,6 +30,7 @@ class DatabaseSeeder extends Seeder
         \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
         $this->command->info('🎉 Semua seeder berhasil dijalankan!');
+        
     }
 
     /**

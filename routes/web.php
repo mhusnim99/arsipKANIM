@@ -24,7 +24,7 @@ Route::get('/', function () {
 
     return Auth::user()->role === 'admin'
         ? redirect()->route('admin.dashboard')
-        : redirect()->route('user.pengiriman.index');
+        : redirect()->route('user.pengiriman');
 });
 
 /*
@@ -134,6 +134,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/pengiriman', [PengirimanBerkasController::class, 'index'])->name('pengiriman');
         Route::post('/pengiriman/store', [PengirimanBerkasController::class, 'store'])->name('pengiriman.store');
         Route::get('/pengiriman/riwayat', [PengirimanBerkasController::class, 'riwayat'])->name('pengiriman-riwayat');
+        Route::post('/pengiriman/fetch-simkim', [PengirimanBerkasController::class, 'fetchSimkim'])->name('pengiriman.fetch-simkim');
         Route::get('/user/pengiriman/check-status/{id}', [PengirimanBerkasController::class, 'checkStatus'])->name('user.pengiriman.check-status');
     });
 

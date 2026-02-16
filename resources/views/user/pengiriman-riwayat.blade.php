@@ -9,7 +9,7 @@
                 <i class="fas fa-history text-primary mr-2"></i>Riwayat Pengiriman Berkas
             </h1>
             <div>
-                <a href="{{ route('user.pengiriman.index') }}" class="btn btn-primary shadow-sm">
+                <a href="{{ route('user.pengiriman') }}" class="btn btn-primary shadow-sm">
                     <i class="fas fa-plus-circle mr-2"></i>Kirim Berkas Baru
                 </a>
                 <a href="{{ route('user.pengiriman') }}" class="btn btn-outline-primary shadow-sm">
