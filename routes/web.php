@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArsipController;
 use App\Http\Controllers\CekPermohonanController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\LokerController;
 use App\Http\Controllers\ManajemenLokasiController;
 use App\Http\Controllers\PenerimaanArsipController;
@@ -24,7 +25,7 @@ Route::get('/', function () {
 
     return Auth::user()->role === 'admin'
         ? redirect()->route('admin.dashboard')
-        : redirect()->route('user.pengiriman.index');
+        : redirect()->route('user.pengiriman');
 });
 
 /*
@@ -42,17 +43,16 @@ Route::middleware('auth')->group(function () {
     Route::prefix('admin')->name('admin.')->group(function () {
 
         // Dashboard
-        Route::get('/dashboard', function () {
-            abort_unless(Auth::user()->role === 'admin', 403);
-            return view('admin.dashboard');
-        })->name('dashboard');
+        Route::get('/dashboard', [DashboardController::class, 'index'])
+            ->name('dashboard');
 
         /*
         |--------------------------------------------------------------------------
-        | Manajemen Lemari (Lokasi Arsip)
+        | Manajemen Lemari
         |--------------------------------------------------------------------------
         */
         Route::prefix('manajemen-lemari')->name('manajemen-lemari.')->group(function () {
+
             Route::get('/', [ManajemenLokasiController::class, 'index'])->name('index');
             Route::get('/create', [ManajemenLokasiController::class, 'create'])->name('create');
             Route::post('/', [ManajemenLokasiController::class, 'store'])->name('store');
@@ -60,69 +60,60 @@ Route::middleware('auth')->group(function () {
             Route::get('/{id}/edit', [ManajemenLokasiController::class, 'edit'])->name('edit');
             Route::put('/{id}', [ManajemenLokasiController::class, 'update'])->name('update');
             Route::delete('/{id}', [ManajemenLokasiController::class, 'destroy'])->name('destroy');
-            Route::put('/loker/{id}/kapasitas', [ManajemenLokasiController::class, 'updateKapasitasLoker'])->name('loker.kapasitas');
 
-            // Loker (ADMIN ONLY)
+            Route::put('/loker/{id}/kapasitas', [ManajemenLokasiController::class, 'updateKapasitasLoker'])
+                ->name('loker.kapasitas');
+
             Route::put('/loker/{id}', [ManajemenLokasiController::class, 'updateLoker'])
                 ->name('loker.update');
 
             Route::get('/{lemariId}/lokers-kosong', [ManajemenLokasiController::class, 'getLokerKosong'])
                 ->name('loker.kosong');
-            Route::get(
-                'loker/{id}/detail',
-                [LokerController::class, 'detail']
-            )->name('loker.detail');
+
+            Route::get('/loker/{id}/detail', [LokerController::class, 'show'])
+                ->name('loker.show');
         });
 
         /*
         |--------------------------------------------------------------------------
-        | Penerimaan Arsip
+        | PENERIMAAN ARSIP
         |--------------------------------------------------------------------------
         */
         Route::prefix('penerimaan-arsip')->name('penerimaan-arsip.')->group(function () {
-                Route::get('/', [PenerimaanArsipController::class, 'index'])->name('index');
-                Route::post('{id}/terima', [PenerimaanArsipController::class, 'terima'])->name('terima');
-                Route::post('{id}/tolak', [PenerimaanArsipController::class, 'tolak'])->name('tolak');
-                Route::get('{id}/detail', [PenerimaanArsipController::class, 'show'])->name('detail');
 
-                // ✅ INI YANG DIPAKAI DROPDOWN
-                Route::get(
-                    'lemari/{lemari}/lokers',
-                    [PenerimaanArsipController::class, 'getLokersByLemari']
-                )->name('lokers');
+            Route::get('/', [PenerimaanArsipController::class, 'index'])->name('index');
 
-                // generate nomor arsip
-                Route::get(
-                    'loker/{loker}/generate-nomor-arsip',
-                    [LokerController::class, 'generateNomorArsip']
-                )->name('generate-nomor-arsip');
-            });
+            Route::post('/{id}/terima', [PenerimaanArsipController::class, 'terima'])->name('terima');
 
+            Route::post('/{id}/tolak', [PenerimaanArsipController::class, 'tolak'])->name('tolak');
 
-        // Arsip
-        Route::get('/arsip', function () {
-            abort_unless(Auth::user()->role === 'admin', 403);
-            return view('admin.arsip.index');
-        })->name('arsip.index');
+            Route::get('/{id}/detail', [PenerimaanArsipController::class, 'show'])->name('detail');
 
-        Route::prefix('arsip')
-            ->name('arsip.')
-            ->group(function () {
+            Route::get('/lemari/{lemari}/lokers', [PenerimaanArsipController::class, 'getLokersByLemari'])
+                ->name('lokers');
 
-                // LIST + SEARCH
-                Route::get('/', [ArsipController::class, 'index'])
-                    ->name('index');
+            Route::get('/loker/{loker}/generate-nomor-arsip', [LokerController::class, 'generateNomorArsip'])
+                ->name('generate-nomor-arsip');
+        });
 
-                // DETAIL ARSIP
-                Route::get('/{arsip}', [ArsipController::class, 'show'])
-                    ->name('show');
+        /*
+        |--------------------------------------------------------------------------
+        | ARSIP
+        |--------------------------------------------------------------------------
+        */
+        Route::prefix('arsip')->name('arsip.')->group(function () {
 
-                // (NEXT)
-                //Pinjam Arsip
-                Route::post('/{arsip}/pinjam', [PenerimaanArsipController::class, 'pinjam'])->name('pinjam');
-                // Musnahkan Arsip
-                Route::post('/{arsip}/musnah', [PenerimaanArsipController::class, 'musnah'])->name('musnah');
-            });
+            Route::get('/', [ArsipController::class, 'index'])->name('index');
+
+            Route::get('/{arsip}', [ArsipController::class, 'show'])->name('show');
+
+            Route::put('/{arsip}/status', [ArsipController::class, 'update'])->name('update');
+
+            Route::post('/{arsip}/pinjam', [PenerimaanArsipController::class, 'pinjam'])->name('pinjam');
+
+            Route::post('/{arsip}/musnah', [PenerimaanArsipController::class, 'musnah'])->name('musnah');
+        });
+
     });
 
     /*
@@ -131,18 +122,31 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
     Route::prefix('user')->name('user.')->group(function () {
+
         Route::get('/pengiriman', [PengirimanBerkasController::class, 'index'])->name('pengiriman');
+
         Route::post('/pengiriman/store', [PengirimanBerkasController::class, 'store'])->name('pengiriman.store');
-        Route::get('/pengiriman/riwayat', [PengirimanBerkasController::class, 'riwayat'])->name('pengiriman-riwayat');
-        Route::get('/user/pengiriman/check-status/{id}', [PengirimanBerkasController::class, 'checkStatus'])->name('user.pengiriman.check-status');
+
+        Route::get('/pengiriman/riwayat', [PengirimanBerkasController::class, 'riwayat'])
+            ->name('pengiriman-riwayat');
+
+        Route::get('/pengiriman/check-status/{id}', [PengirimanBerkasController::class, 'checkStatus'])
+            ->name('pengiriman.check-status');
+
+        Route::get('/pengiriman/ditolak', [PengirimanBerkasController::class, 'berkasDitolak'])
+            ->name('pengiriman.ditolak');
+
+        Route::post('/pengiriman/kirim-perbaikan/{id}', [PengirimanBerkasController::class, 'kirimPerbaikan'])
+            ->name('pengiriman.kirim-perbaikan');
     });
 
     /*
     |--------------------------------------------------------------------------
-    | Fallback
+    | FALLBACK
     |--------------------------------------------------------------------------
     */
     Route::fallback(function () {
         return redirect('/');
     });
+
 });

@@ -50,7 +50,7 @@
                 <thead class="bg-light">
                     <tr>
                         <th>No</th>
-                        <th>Nomor Arsip</th>
+                        <th>Slot</th>
                         <th>Kode Permohonan</th>
                         <th>Asal Berkas</th>
                         <th>Tanggal Masuk</th>

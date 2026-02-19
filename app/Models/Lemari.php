@@ -4,8 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
-use App\Models\Loker;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Lemari extends Model
 {
@@ -20,73 +19,44 @@ class Lemari extends Model
         'keterangan',
     ];
 
-
     protected $casts = [
         'jumlah_kolom' => 'integer',
         'jumlah_baris_per_kolom' => 'integer',
-        'kapasitas_total' => 'integer',
-        'penuh' => 'integer'
     ];
 
-    /**
-     * Relasi ke loker
-     */
-    public function lokers()
+    /* ================= RELATION ================= */
+
+    public function lokers(): HasMany
     {
         return $this->hasMany(Loker::class);
     }
 
-    public function arsips()
+    public function arsips(): HasManyThrough
     {
         return $this->hasManyThrough(Arsip::class, Loker::class);
     }
 
-    public function getJumlahLokerTerisiAttribute(): int
+    /* ================= HELPER ================= */
+
+    public function kapasitasTotalArsip(): int
     {
-        return $this->lokers()
-            ->whereIn('status', ['aktif', 'penuh'])
-            ->count();
-    }
-    /**
-     * Scope untuk lemari aktif
-     */
-    public function scopeAktif($query)
-    {
-        return $query->where('status', 'aktif');
+        return $this->lokers()->sum('kapasitas');
     }
 
-    /**
-     * Scope untuk lemari dengan kapasitas tersedia
-     */
-    public function scopeTersedia($query)
+    public function jumlahArsip(): int
     {
-        return $query->where('status', 'aktif')
-            ->whereColumn('penuh', '<', 'kapasitas_total');
+        return $this->arsips()->count();
     }
 
-    /**
-     * Hitung persentase penuh
-     */
-    public function getPersentaseTerisiAttribute()
+    public function jumlahLokerTersedia(): int
     {
-        if ($this->kapasitas_total == 0) return 0;
-        return round(($this->penuh / $this->kapasitas_total) * 100, 2);
+        return $this->lokers()->where('status', 'tersedia')->count();
     }
 
-    /**
-     * Hitung kapasitas tersisa
-     */
-    public function getKapasitasTersisaAttribute()
-    {
-        return $this->kapasitas_total - $this->penuh;
-    }
+    /* ================= GENERATE LOKER ================= */
 
-    /**
-     * Generate loker otomatis
-     */
     public function generateLokers(): void
     {
-        // 🔒 GUARD: jangan generate ulang
         if ($this->lokers()->exists()) {
             return;
         }
@@ -97,68 +67,46 @@ class Lemari extends Model
             for ($baris = 1; $baris <= $this->jumlah_baris_per_kolom; $baris++) {
                 Loker::create([
                     'lemari_id'  => $this->id,
-                    'kode_loker' => sprintf(
-                        '%s.%s.%04d',
-                        $this->kode_lemari,
-                        $kolom,
-                        $baris
-                    ),
+                    'kode_loker' => "{$this->kode_lemari}.{$kolom}." . str_pad($baris, 4, '0', STR_PAD_LEFT),
                     'kolom'      => $kolom,
                     'baris'      => $baris,
-                    'kapasitas'  => 1,
-                    'status'     => 'aktif',
+                    'kapasitas'  => 350,
+                    'terisi'     => 0,
+                    'status'     => 'tersedia',
                 ]);
             }
         }
     }
 
+    /* ================= SYNC STATUS ================= */
 
-    /**
-     * Get status badge color
-     */
-    public function getStatusBadgeAttribute()
-    {
-        $badges = [
-            'aktif' => 'success',
-            'nonaktif' => 'secondary',
-            'penuh' => 'warning'
-        ];
-
-        return $badges[$this->status] ?? 'secondary';
-    }
-
-    /**
-     * Get status text
-     */
-    public function getStatusTextAttribute()
-    {
-        $texts = [
-            'aktif' => 'Aktif',
-            'nonaktif' => 'Nonaktif',
-            'penuh' => 'Penuh'
-        ];
-
-        return $texts[$this->status] ?? $this->status;
-    }
     public function syncStatus(): void
     {
         if ($this->status === 'nonaktif') {
             return;
         }
 
-        $this->status = $this->jumlahArsip() >= $this->kapasitasTotalArsip()
-            ? 'penuh'
-            : 'aktif';
+        $this->status = $this->jumlahLokerTersedia() > 0
+            ? 'aktif'
+            : 'penuh';
 
         $this->save();
     }
-    public function kapasitasTotalArsip(): int
+
+    /* ================= DISPLAY ================= */
+
+    public function getStatusBadgeAttribute(): string
     {
-        return $this->lokers()->sum('kapasitas');
+        return match ($this->status) {
+            'aktif'     => 'success',
+            'penuh'     => 'warning',
+            'nonaktif'  => 'secondary',
+            default     => 'secondary',
+        };
     }
 
-    public function jumlahArsip(): int
+    public function getStatusTextAttribute(): string
     {
-        return $this->arsips()->count();
+        return ucfirst($this->status);
     }
 }

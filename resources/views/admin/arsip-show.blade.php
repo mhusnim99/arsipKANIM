@@ -1,67 +1,155 @@
 @extends('layouts.admin')
 
 @section('main-content')
-    <h1 class="h3 mb-4 text-gray-800">
-        Detail Arsip – {{ $arsip->nomor_arsip }}
-    </h1>
+<div class="container-fluid">
 
-    <span class="badge badge-{{ $arsip->status_badge }}">
-        {{ $arsip->status_text }}
-    </span>
-    <table class="table table-bordered">
-        <tr>
-            <th width="30%">Kode Permohonan</th>
-            <td>{{ $arsip->kode_permohonan }}</td>
-        </tr>
-        <tr>
-            <th>Asal Berkas</th>
-            <td>{{ $arsip->asal_berkas }}</td>
-        </tr>
-        <tr>
-            <th>Tanggal Masuk</th>
-            <td>{{ $arsip->tanggal_masuk->format('d/m/Y') }}</td>
-        </tr>
-        <tr>
-            <th>Petugas Penerima</th>
-            <td>{{ optional($arsip->petugasPenerima)->name ?? '-' }}</td>
-        </tr>
-    </table>
-    <div class="alert alert-info">
-        <strong>Lokasi Arsip:</strong><br>
-        Lemari : {{ $arsip->lemari->kode_lemari }}<br>
-        Loker : {{ $arsip->loker->kolom }}{{ $arsip->loker->baris }}
-    </div>
-    <table class="table table-sm">
-        <tr>
-            <th>Status</th>
-            <td>{{ $arsip->status_text }}</td>
-        </tr>
-        <tr>
-            <th>Diterima Pada</th>
-            <td>{{ $arsip->created_at->format('d/m/Y H:i') }}</td>
-        </tr>
-    </table>
-    <div class="mt-4">
+    {{-- HEADER --}}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
+            <i class="fas fa-folder-open text-primary mr-2"></i>
+            Detail Arsip
+        </h1>
 
-        @if ($arsip->status === 'tersimpan')
-            <form method="POST" action="{{ route('admin.arsip.pinjam', $arsip) }}" class="d-inline">
-                @csrf
-                <button class="btn btn-warning">
-                    Pinjam Arsip
-                </button>
-            </form>
-
-            <form method="POST" action="{{ route('admin.arsip.musnah', $arsip) }}" class="d-inline"
-                onsubmit="return confirm('Yakin memusnahkan arsip?')">
-                @csrf
-                <button class="btn btn-danger">
-                    Musnahkan
-                </button>
-            </form>
-        @endif
-
-        <a href="{{ route('admin.arsip.index') }}" class="btn btn-secondary">
-            Kembali
+        <a href="{{ route('admin.arsip.index') }}" class="btn btn-outline-secondary btn-sm px-3">
+            <i class="fas fa-arrow-left mr-1"></i> Kembali
         </a>
     </div>
+
+    <div class="row">
+
+        {{-- INFORMASI UTAMA --}}
+        <div class="col-lg-8 mb-3">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-gradient-primary text-white font-weight-bold">
+                    <i class="fas fa-info-circle mr-2"></i> Informasi Arsip
+                </div>
+
+                <div class="card-body p-0">
+                    <table class="table table-bordered mb-0 small">
+                        <tr>
+                            <th width="35%" class="bg-light">Kode Permohonan</th>
+                            <td class="font-weight-bold">{{ $arsip->kode_permohonan }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Asal Berkas</th>
+                            <td>{{ $arsip->asal_berkas }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Tanggal Masuk</th>
+                            <td>{{ $arsip->tanggal_masuk->format('d/m/Y') }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Petugas Penerima</th>
+                            <td>{{ optional($arsip->petugasPenerima)->name ?? '-' }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Diterima Pada</th>
+                            <td>{{ $arsip->created_at->format('d/m/Y H:i') }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        {{-- LOKASI & STATUS --}}
+        <div class="col-lg-4 mb-3">
+
+            {{-- LOKASI --}}
+            <div class="card shadow-sm border-0 mb-3">
+                <div class="card-header bg-info text-white font-weight-bold">
+                    <i class="fas fa-map-marker-alt mr-2"></i> Lokasi Arsip
+                </div>
+
+                <div class="card-body text-center py-4">
+                    <h3 class="font-weight-bold mb-1">
+                        {{ optional($arsip->lemari)->kode_lemari ?? '-' }}/
+                        {{ optional($arsip->loker)->kolom ?? '-' }}{{ optional($arsip->loker)->baris ?? '-' }}/
+                        {{ $arsip->nomor_arsip ?? '-' }}
+                    </h3>
+                    <span class="badge badge-light border px-3 py-1">
+                        Lemari / Loker / Slot
+                    </span>
+                </div>
+            </div>
+
+            {{-- STATUS --}}
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-secondary text-white font-weight-bold">
+                    <i class="fas fa-tag mr-2"></i> Status Arsip
+                </div>
+
+                <div class="card-body text-center py-4">
+                    <span class="badge badge-{{ $arsip->status_badge }} px-4 py-2 shadow-sm">
+                        {{ $arsip->status_text }}
+                    </span>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    {{-- INFO PEMINJAMAN --}}
+    @if ($arsip->status == 'dipinjam')
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-warning text-white font-weight-bold">
+                <i class="fas fa-hand-holding mr-2"></i> Informasi Peminjaman
+            </div>
+
+            <div class="card-body p-0">
+                <table class="table table-bordered mb-0 small">
+                    <tr>
+                        <th width="30%" class="bg-light">Dipinjam Oleh</th>
+                        <td>{{ $arsip->dipinjam_oleh }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Keperluan</th>
+                        <td>{{ $arsip->keperluan }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Tanggal & Waktu</th>
+                        <td>{{ \Carbon\Carbon::parse($arsip->tanggal_pinjam)->format('d/m/Y H:i') }}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="card-footer text-right bg-light">
+                <form method="POST"
+                      action="{{ route('admin.arsip.update', $arsip->id) }}"
+                      onsubmit="return confirm('Yakin arsip sudah dikembalikan?')">
+                    @csrf
+                    @method('PUT')
+                    <input type="hidden" name="status" value="tersimpan">
+
+                    <button class="btn btn-success px-4">
+                        <i class="fas fa-check mr-1"></i> Arsip Dikembalikan
+                    </button>
+                </form>
+            </div>
+        </div>
+    @endif
+
+    {{-- INFO PEMUSNAHAN --}}
+    @if ($arsip->status == 'musnah')
+        <div class="card border-0 shadow-sm mt-4">
+            <div class="card-header bg-danger text-white font-weight-bold">
+                <i class="fas fa-trash mr-2"></i> Informasi Pemusnahan
+            </div>
+
+            <div class="card-body p-0">
+                <table class="table table-bordered mb-0 small">
+                    <tr>
+                        <th width="30%" class="bg-light">Dimusnahkan Oleh</th>
+                        <td>{{ $arsip->dimusnahkan_oleh }}</td>
+                    </tr>
+                    <tr>
+                        <th class="bg-light">Tanggal & Waktu</th>
+                        <td>{{ \Carbon\Carbon::parse($arsip->tanggal_musnah)->format('d/m/Y H:i') }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    @endif
+
+</div>
 @endsection
