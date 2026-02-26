@@ -1,137 +1,138 @@
 @extends('layouts.admin')
 
 @section('main-content')
-    <div class="container-fluid">
+<div class="container-fluid">
 
-        <h1 class="h3 mb-4 text-gray-800">
-            <i class="fas fa-inbox mr-2"></i>Penerimaan Arsip
+    <!-- HEADER -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+       <h1 class="h3 font-weight-bold" style="color:#1E3A8A;">
+            Penerimaan Arsip
         </h1>
+        <span class="badge px-4 py-2 shadow-sm" style="background:#1E3A8A; color:white;">
+            <i class="fas fa-clock"></i> Menunggu Verifikasi
+        </span>
+    </div>
 
-        @if (session('success'))
-            <div class="alert alert-success">{{ session('success') }}</div>
-        @endif
-        @if (session('error'))
-            <div class="alert alert-danger">{{ session('error') }}</div>
-        @endif
+    <!-- CARD TABLE -->
+    <div class="card shadow border-0 mb-4">
+        <div class="card-header text-white font-weight-bold" style="background:linear-gradient(135deg,#38BDF8,#0EA5E9)">
+            <i class="fas fa-paper-plane mr-1"></i> Daftar Pengiriman Berkas
+        </div>
 
-        <div class="card shadow">
-            <div class="card-header bg-warning text-white">
-                <strong>Pengiriman Menunggu</strong>
-            </div>
+        <div class="card-body table-responsive">
+            <table class="table table-hover table-bordered align-middle">
+                <thead class="thead-light text-center">
+                    <tr>
+                        <th width="50">No</th>
+                        <th class="text-left">Kode Permohonan</th>
+                        <th width="120">Tanggal</th>
+                        <th class="text-left">Asal</th>
+                        <th width="140">Petugas</th>
+                        <th width="230">Aksi</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($pengirimanBerkas as $item)
+                    <tr>
+                        <td class="text-center">{{ $loop->iteration }}</td>
+                        <td class="thead-light">{{ $item->kode_permohonan }}</td>
+                        <td class="text-center">
+                            <span class="badge badge-info px-3">
+                                {{ $item->tanggal_kirim->format('d/m/Y') }}
+                            </span>
+                        </td>
+                        <td>{{ $item->asal_berkas }}</td>
+                        <td class="text-center">
+                            <span class="badge badge-secondary px-3">
+                                {{ optional($item->petugasPengirim)->name ?? '-' }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <div class="btn-group">
+                                <button class="btn btn-success btn-sm btn-terima px-3 shadow-sm"
+                                        data-id="{{ $item->id }}">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn btn-danger btn-sm btn-tolak px-3 shadow-sm"
+                                        data-id="{{ $item->id }}">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                                <button class="btn btn-info btn-sm btn-detail px-3 shadow-sm"
+                                        data-id="{{ $item->id }}">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                    @empty
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="fas fa-inbox fa-2x mb-2"></i>
+                            <br>Tidak ada data pengiriman
+                        </td>
+                    </tr>
+                    @endforelse
+                </tbody>
+            </table>
 
-            <div class="card-body table-responsive">
-                <table class="table table-bordered">
-                    <thead>
-                        <tr>
-                            <th>No</th>
-                            <th>Kode</th>
-                            <th>Tanggal</th>
-                            <th>Asal</th>
-                            <th>Petugas</th>
-                            <th>Aksi</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($pengirimanBerkas as $item)
-                            <tr>
-                                <td>{{ $loop->iteration }}</td>
-                                <td>{{ $item->kode_permohonan }}</td>
-                                <td>{{ $item->tanggal_kirim->format('d/m/Y') }}</td>
-                                <td>{{ $item->asal_berkas }}</td>
-                                <td>{{ optional($item->petugasPengirim)->name ?? '-' }}</td>
-                                <td>
-                                    <button class="btn btn-success btn-sm btn-terima" data-id="{{ $item->id }}"
-                                        data-kode="{{ $item->kode_permohonan }}">
-                                        Terima
-                                    </button>
-
-                                    <button class="btn btn-danger btn-sm btn-tolak" data-id="{{ $item->id }}"
-                                        data-kode="{{ $item->kode_permohonan }}">
-                                        Tolak
-                                    </button>
-
-                                    <button class="btn btn-info btn-sm btn-detail" data-id="{{ $item->id }}">
-                                        Detail
-                                    </button>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="6" class="text-center">Tidak ada data</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-
+            <div class="mt-3">
                 {{ $pengirimanBerkas->links() }}
             </div>
         </div>
+    </div>
+</div>
 
-        {{-- ================= MODAL TERIMA ================= --}}
-        <div class="modal fade" id="modalTerima">
-            <div class="modal-dialog modal-lg">
-                <form method="POST" id="formTerima" class="modal-content">
-                    @csrf
-
-                    <div class="modal-header bg-success text-white">
-                        <h5>Terima Arsip</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    </div>
-
-                    <div class="modal-body">
-                        <div class="alert alert-info">
-                            Kode Permohonan: <strong id="kodeTerima"></strong>
-                        </div>
-
-                        <div class="alert alert-info">
-                            Lokasi penyimpanan arsip akan ditentukan otomatis oleh sistem
-                            berdasarkan lemari terlama dan loker yang masih tersedia.
-                        </div>
-                        <div class="form-group">
-                            <label>Nomor Arsip</label>
-                            <input type="text" id="nomor_arsip" name="nomor_arsip" value="Akan digenerate otomatis" class="form-control" readonly>
-                        </div>
-
-                        <div class="form-group">
-                            <label>Keterangan</label>
-                            <textarea name="keterangan" class="form-control"></textarea>
-                        </div>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                        <button class="btn btn-success">Simpan</button>
-                    </div>
-                </form>
+{{-- MODAL TERIMA --}}
+<div class="modal fade" id="modalTerima" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-success shadow">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-check-circle mr-2"></i> Berhasil
+                </h5>
+                <button class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body text-center">
+                <h5 id="hasilKode"></h5>
+                <p id="hasilLokasi"></p>
+                <span class="badge badge-success" id="hasilStatus"></span>
             </div>
         </div>
+    </div>
+</div>
 
-        {{-- ================= MODAL TOLAK ================= --}}
-        <div class="modal fade" id="modalTolak">
-            <div class="modal-dialog">
-                <form method="POST" id="formTolak" class="modal-content">
-                    @csrf
+{{-- MODAL TOLAK --}}
+<div class="modal fade" id="modalTolak" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <form id="formTolak" method="POST" class="w-100">
+            @csrf
+            <div class="modal-content border-danger shadow">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-times-circle mr-2"></i> Tolak Arsip
+                    </h5>
+                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                </div>
 
-                    <div class="modal-header bg-danger text-white">
-                        <h5>Tolak Arsip</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label class="font-weight-bold">Alasan Penolakan</label>
+                        <textarea class="form-control" name="alasan_penolakan"
+                                  rows="4" placeholder="Masukkan alasan penolakan..." required></textarea>
                     </div>
+                </div>
 
-                    <div class="modal-body">
-                        <p>Menolak arsip: <strong id="kodeTolak"></strong></p>
-                        <textarea name="alasan_penolakan" class="form-control" required></textarea>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                        <button class="btn btn-danger">Tolak</button>
-                    </div>
-                </form>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary px-4" data-dismiss="modal">Batal</button>
+                    <button type="submit" class="btn btn-danger px-4">Simpan</button>
+                </div>
             </div>
-        </div>
+        </form>
+    </div>
+</div>
 
-        {{-- ================= MODAL DETAIL ================= --}}
-        <div class="modal fade" id="modalDetail">
+{{-- MODAL DETAIL --}}
+<div class="modal fade" id="modalDetail">
             <div class="modal-dialog modal-lg">
                 <div class="modal-content">
                     <div class="modal-header bg-info text-white">
@@ -141,30 +142,35 @@
                     <div class="modal-body" id="detailContent">Loading...</div>
                 </div>
             </div>
-        </div>
-
-    </div>
+</div>
 @endsection
 
 @section('scripts')
-    <script>
-        $(document).on('click', '.btn-terima', function() {
-            const id = $(this).data('id');
-            const kode = $(this).data('kode');
-            $('#kodeTerima').text(kode);
-            $('#formTerima').attr('action', `/admin/penerimaan-arsip/${id}/terima`);
-            $('#modalTerima').modal('show');
-        });
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        $(document).on('click', '.btn-tolak', function() {
-            const id = $(this).data('id');
-            const kode = $(this).data('kode');
-            $('#kodeTolak').text(kode);
-            $('#formTolak').attr('action', `/admin/penerimaan-arsip/${id}/tolak`);
-            $('#modalTolak').modal('show');
-        });
+<script>
+$(function() {
 
-        $(document).on('click', '.btn-detail', function() {
+    $('.btn-terima').click(function(){
+        let id = $(this).data('id');
+
+        $.post(`/admin/penerimaan-arsip/${id}/terima`,
+    {_token:'{{ csrf_token() }}'}).done(function(res){
+    Swal.fire({
+        icon:'success',
+        title:'Berhasil',
+        text:'Berkas berhasil diterima',
+        timer:1500,
+        showConfirmButton:false
+    });
+    setTimeout(()=>location.reload(),1200);}).fail(function(xhr){
+    Swal.fire({
+        icon:'error',
+        title:'Terjadi Kesalahan',
+        text: xhr.responseJSON?.message ?? 'Server Error'});});
+    });
+
+     $(document).on('click', '.btn-detail', function() {
             const id = $(this).data('id');
             $('#modalDetail').modal('show');
             $('#detailContent').html('Loading...');
@@ -177,36 +183,30 @@
             </table>
         `);
             });
-        });
+    });
 
-        $(document).on('change', '#lemari_id', function() {
-            const lemariId = $(this).val();
-            const lokerSelect = $('#loker_id');
+    $('.btn-tolak').click(function(){
+        $('#formTolak').data('id', $(this).data('id'));
+        $('#modalTolak').modal('show');
+    });
 
-            console.log('LEMARI DIPILIH:', lemariId);
+    $('#formTolak').submit(function(e){
+        e.preventDefault();
+        let id = $(this).data('id');
 
-            lokerSelect.html('<option value="">Loading...</option>');
-
-            if (!lemariId) {
-                lokerSelect.html('<option value="">-- Pilih Loker --</option>');
-                return;
-            }
-
-            $.get(`/admin/penerimaan-arsip/lemari/${lemariId}/lokers`, function(data) {
-                console.log('LOKER:', data);
-
-                let html = '<option value="">-- Pilih Loker --</option>';
-
-                if (data.length === 0) {
-                    html = '<option value="">Tidak ada loker tersedia</option>';
-                }
-
-                data.forEach(loker => {
-                    html += `<option value="${loker.id}">${loker.kode_loker}</option>`;
-                });
-
-                lokerSelect.html(html);
+        $.post(`/admin/penerimaan-arsip/${id}/tolak`, $(this).serialize(), function(){
+            $('#modalTolak').modal('hide');
+            Swal.fire({
+                icon:'success',
+                title:'Ditolak',
+                text:'Berkas berhasil ditolak',
+                timer:1500,
+                showConfirmButton:false
             });
+            setTimeout(()=>location.reload(),1200);
         });
-    </script>
+    });
+
+});
+</script>
 @endsection

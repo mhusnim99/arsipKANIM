@@ -38,4 +38,19 @@ class SimkimApiService
 
         return $response->json();
     }
+    public function getPermohonanSelesai(): array
+    {
+        $response = Http::withHeaders([
+            'Accept'        => 'application/json',
+            'Authorization' => 'Bearer ' . $this->token,
+        ])->get("{$this->baseUrl}/paspor", [
+            'status' => 'SELESAI'
+        ]);
+
+        if ($response->failed()) {
+            return [];
+        }
+
+        return $response->json();
+    }
 }

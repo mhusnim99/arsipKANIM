@@ -11,7 +11,7 @@ class CreateLemarisTable extends Migration
     {
         Schema::create('lemaris', function (Blueprint $table) {
             $table->id();
-            $table->string('kode_lemari', 10)->unique();
+            $table->integer('nomor_lemari')->unique();
             $table->string('nama_lemari', 100);
             $table->integer('jumlah_kolom')->default(3);
             $table->integer('jumlah_baris_per_kolom')->default(10);

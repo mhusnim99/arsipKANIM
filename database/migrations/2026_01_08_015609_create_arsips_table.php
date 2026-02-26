@@ -26,7 +26,7 @@ class CreateArsipsTable extends Migration
             $table->foreignId('petugas_pengirim_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('diterima_oleh')->nullable()->constrained('users')->onDelete('set null');
 
-            $table->enum('status', ['tersimpan', 'dipinjam', 'hilang'])->default('tersimpan');
+            $table->enum('status', ['tersimpan', 'dipinjam', 'musnah'])->default('tersimpan');
             $table->timestamps();
 
             // Indexes

@@ -1,107 +1,146 @@
 @extends('layouts.admin')
 
 @section('main-content')
-    <div class="container-fluid">
+<div class="container-fluid">
 
-        <!-- Page Heading -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">Manajemen Lemari Arsip</h1>
-            <a href="{{ route('admin.manajemen-lemari.create') }}" class="btn btn-primary shadow-sm">
-                <i class="fas fa-plus-circle mr-2"></i>Tambah Lemari
-            </a>
+    <!-- HEADER -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 font-weight-bold" style="color:#1E3A8A;">
+            Manajemen Lemari
+        </h1>
+
+        <a href="{{ route('admin.manajemen-lemari.create') }}"
+           class="badge px-4 py-2 shadow-sm" style="background:#1E3A8A; color:white;">
+            <i class="fas fa-plus-circle mr-2"></i> Tambah Lemari
+        </a>
+    </div>
+
+    <!-- CARD TABLE -->
+    <div class="card shadow border-0 mb-4">
+        <div class="card-header text-white font-weight-bold"
+             style="background:linear-gradient(135deg,#f6d365,#fda085)">
+            <i class="fas fa-table mr-1"></i> Daftar Lemari Arsip
         </div>
 
-        <!-- Card -->
-        <div class="card shadow mb-4">
-            <div class="card-header py-3 bg-success text-white">
-                <h6 class="m-0 font-weight-bold">
-                    <i class="fas fa-table mr-2"></i>Daftar Lemari
-                </h6>
-            </div>
+        <div class="card-body">
 
-            <div class="card-body">
+            {{-- ALERT --}}
+            @if (session('success'))
+                <div class="alert alert-success alert-dismissible fade show shadow-sm">
+                    <i class="fas fa-check-circle mr-1"></i> {{ session('success') }}
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+            @endif
 
-                {{-- Notifikasi --}}
-                @if (session('success'))
-                    <div class="alert alert-success">{{ session('success') }}</div>
-                @endif
-                @if (session('error'))
-                    <div class="alert alert-danger">{{ session('error') }}</div>
-                @endif
+            @if (session('error'))
+                <div class="alert alert-danger alert-dismissible fade show shadow-sm">
+                    <i class="fas fa-times-circle mr-1"></i> {{ session('error') }}
+                    <button type="button" class="close" data-dismiss="alert">&times;</button>
+                </div>
+            @endif
 
-                <!-- Table -->
-                <div class="table-responsive">
-                    <table class="table table-bordered table-hover">
-                        <thead class="bg-light">
+            <!-- TABLE -->
+            <div class="table-responsive">
+                <table class="table table-hover table-bordered align-middle">
+                    <thead class="thead-light text-center">
+                        <tr>
+                            <th width="50">No</th>
+                            <th>Kode Lemari</th>
+                            <th>Nama Lemari</th>
+                            <th>Total Loker</th>
+                            <th>Kapasitas</th>
+                            <th>Loker Terisi</th>
+                            <th>Status</th>
+                            <th width="160">Aksi</th>
+                        </tr>
+                    </thead>
+
+                    <tbody class="text-center">
+                        @forelse($lemaris as $lemari)
+                            @php
+                                $totalLoker = $lemari->lokers->count();
+                                $totalKapasitas = $lemari->lokers->sum('kapasitas');
+                            @endphp
+
                             <tr>
-                                <th>No</th>
-                                <th>Kode Lemari</th>
-                                <th>Nama Lemari</th>
-                                <th>Total Loker</th>
-                                <th>Total Kapasitas</th>
-                                <th>Loker Terisi</th>
-                                <th>Status</th>
-                                <th width="18%">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse($lemaris as $lemari)
-                                @php
-                                    $totalLoker = $lemari->lokers->count();
-                                    $totalKapasitas = $lemari->lokers->sum('kapasitas');
-                                    $lokerTerisi = $lemari->lokers->where('status', 'terisi')->count();
-                                @endphp
-                                <tr>
-                                    <td>{{ ($lemaris->currentPage() - 1) * $lemaris->perPage() + $loop->iteration }}</td>
-                                    <td><strong>{{ $lemari->kode_lemari }}</strong></td>
-                                    <td>{{ $lemari->nama_lemari }}</td>
-                                    <td class="text-center">{{ $totalLoker }}</td>
-                                    <td class="text-center">{{ $totalKapasitas }}</td>
-                                    <td class="text-center">
-                                        <span class="badge badge-primary">
-                                            {{ $lemari->jumlah_loker_terisi }} / {{ $lemari->lokers->count() }}
-                                        </span>
-                                    </td>
-                                    <td class="text-center">
-                                        <span
-                                            class="badge {{ $lemari->status == 'aktif' ? 'badge-success' : 'badge-secondary' }}">
-                                            {{ ucfirst($lemari->status) }}
-                                        </span>
-                                    </td>
-                                    <td>
+                                <td>
+                                    {{ ($lemaris->currentPage() - 1) * $lemaris->perPage() + $loop->iteration }}
+                                </td>
+
+                                <td >
+                                    {{ $lemari->kode_lemari }}
+                                </td>
+
+                                <td>{{ $lemari->nama_lemari }}</td>
+
+                                <td>
+                                    <span class="badge badge-info px-3">
+                                        {{ $totalLoker }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge badge-primary px-3">
+                                        {{ $totalKapasitas }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge badge-warning px-3">
+                                        {{ $lemari->jumlah_loker_terisi }} / {{ $totalLoker }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <span class="badge {{ $lemari->status === 'aktif' ? 'badge-success' : 'badge-secondary' }} px-3">
+                                        {{ ucfirst($lemari->status) }}
+                                    </span>
+                                </td>
+
+                                <td>
+                                    <div class="btn-group">
                                         <a href="{{ route('admin.manajemen-lemari.show', $lemari->id) }}"
-                                            class="btn btn-sm btn-info">
+                                           class="btn btn-sm btn-info shadow-sm">
                                             <i class="fas fa-eye"></i>
                                         </a>
+
                                         <a href="{{ route('admin.manajemen-lemari.edit', $lemari->id) }}"
-                                            class="btn btn-sm btn-warning">
+                                           class="btn btn-sm btn-warning shadow-sm">
                                             <i class="fas fa-edit"></i>
                                         </a>
+
                                         <form action="{{ route('admin.manajemen-lemari.destroy', $lemari->id) }}"
-                                            method="POST" class="d-inline" onsubmit="return confirm('Hapus lemari ini?')">
+                                              method="POST"
+                                              class="d-inline"
+                                              onsubmit="return confirm('Yakin ingin menghapus lemari ini?')">
                                             @csrf
                                             @method('DELETE')
-                                            <button class="btn btn-sm btn-danger">
+                                            <button class="btn btn-sm btn-danger shadow-sm">
                                                 <i class="fas fa-trash"></i>
                                             </button>
                                         </form>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="8" class="text-center text-muted py-4">
-                                        Belum ada data lemari
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-
-                {{-- Pagination --}}
-                {{ $lemaris->links('pagination::bootstrap-4') }}
-
+                                    </div>
+                                </td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="text-center text-muted py-4">
+                                    <i class="fas fa-folder-open fa-2x mb-2"></i>
+                                    <br>Belum ada data lemari
+                                </td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
             </div>
+
+            <!-- PAGINATION -->
+            <div class="mt-3">
+                {{ $lemaris->links('pagination::bootstrap-4') }}
+            </div>
+
         </div>
     </div>
+
+</div>
 @endsection

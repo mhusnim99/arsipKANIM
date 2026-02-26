@@ -3,12 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\PengirimanBerkas;
-use App\Service\SimkimApiService;
-use App\Services\SimkimApiService as ServicesSimkimApiService;
+use App\Services\SimkimApiService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Log;
+use App\Models\SimkimSync;
 
 class PengirimanBerkasController extends Controller
 {
@@ -17,12 +18,12 @@ class PengirimanBerkasController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
+        $syncData = SimkimSync::where('sudah_dikirim', false)
+            ->where('status_proses', 'SELESAI')
+            ->latest()
+            ->get();
 
-        // ✅ HANYA PETUGAS PENGIRIM
-        abort_unless($user->role === 'user', 403);
-
-        return view('user.pengiriman');
+        return view('user.pengiriman', compact('syncData'));
     }
 
     /**
@@ -30,45 +31,36 @@ class PengirimanBerkasController extends Controller
      */
     public function store(Request $request)
     {
-        abort_unless(Auth::user()->role === 'user', 403);
-
-        $validator = Validator::make($request->all(), [
-            'kode_permohonan' => 'required|string|max:50|unique:pengiriman_berkas,kode_permohonan',
-            'tanggal_kirim'   => 'required|date',
-            'catatan'         => 'nullable|string|max:500',
+        $request->validate([
+            'kode_permohonan' => 'required|string',
+            'simkim_snapshot' => 'required'
         ]);
 
-        if ($validator->fails()) {
-            return back()
-                ->withErrors($validator)
-                ->withInput();
+        $snapshot = json_decode($request->simkim_snapshot, true);
+
+        if (!$snapshot || ($snapshot['permohonan']['alurterakhir'] ?? '') !== 'SELESAI') {
+            return back()->with('error', 'Data tidak valid atau belum selesai.');
         }
 
-        try {
-            $pengiriman = PengirimanBerkas::create([
-                'kode_permohonan'       => trim($request->kode_permohonan),
-                'tanggal_kirim'         => $request->tanggal_kirim,
-                'asal_berkas'           => Auth::user()->kantor, // 🔥 OTOMATIS
-                'catatan'               => $request->catatan ? trim($request->catatan) : null,
-                'petugas_pengirim_id'   => Auth::id(),
-                'status'                => 'menunggu',
-            ]);
-
-            return redirect()
-                ->route('user.pengiriman')
-                ->with(
-                    'success',
-                    'Berkas berhasil dikirim. Kode: ' . $pengiriman->kode_permohonan
-                );
-        } catch (\Exception $e) {
-            Log::error('Pengiriman berkas gagal', [
-                'error' => $e->getMessage()
-            ]);
-
-            return back()
-                ->with('error', 'Gagal mengirim berkas')
-                ->withInput();
+        if (PengirimanBerkas::where('kode_permohonan', $snapshot['permohonan']['nopermohonan'])
+            ->whereIn('status', ['menunggu', 'diterima'])
+            ->exists()
+        ) {
+            return back()->with('error', 'Data sudah pernah dikirim.');
         }
+
+        $pengiriman = PengirimanBerkas::create([
+            'kode_permohonan'     => $snapshot['permohonan']['nopermohonan'],
+            'tanggal_kirim'       => now(),
+            'asal_berkas'         => Auth::user()->kantor,
+            'petugas_pengirim_id' => Auth::id(),
+            'status'              => 'menunggu',
+            'simkim_snapshot'     => $snapshot,
+        ]);
+
+        return redirect()
+            ->route('user.pengiriman')
+            ->with('success', 'Berkas berhasil dikirim dan menunggu verifikasi admin.');
     }
 
     /**
@@ -108,7 +100,7 @@ class PengirimanBerkasController extends Controller
             'status_badge'  => $pengiriman->status_badge,
         ]);
     }
-    public function fetchSimkim(Request $request,ServicesSimkimApiService $simkim)
+    public function fetchSimkim(Request $request, SimkimApiService $simkim)
     {
         $request->validate([
             'kode_permohonan' => 'required|string'
@@ -123,5 +115,57 @@ class PengirimanBerkasController extends Controller
         return back()->with([
             'simkim' => $result['data']
         ]);
+    }
+
+    public function berkasDitolak()
+    {
+        $pengirimanBerkas = PengirimanBerkas::where('petugas_pengirim_id', Auth::id())
+            ->where('status', 'ditolak')
+            ->latest()
+            ->paginate(10);
+
+        return view('user.berkas-ditolak', compact('pengirimanBerkas'));
+    }
+
+    public function kirimPerbaikan($id)
+    {
+        $data = PengirimanBerkas::where('petugas_pengirim_id', Auth::id())
+            ->where('status', 'ditolak')
+            ->findOrFail($id);
+
+        $data->update([
+            'status' => 'menunggu',
+            'alasan_penolakan' => null,
+            'ditolak_pada' => null
+        ]);
+
+        return redirect()->route('user.pengiriman.ditolak')
+            ->with('success', 'Berkas berhasil dikirim ulang ke admin');
+    }
+    public function kirimDariSync($id)
+    {
+        $sync = \App\Models\SimkimSync::findOrFail($id);
+
+        if ($sync->sudah_dikirim) {
+            return back()->with('error', 'Data sudah dikirim.');
+        }
+
+        DB::transaction(function () use ($sync) {
+
+            PengirimanBerkas::create([
+                'kode_permohonan'     => $sync->kode_permohonan,
+                'tanggal_kirim'       => now(),
+                'asal_berkas'         => Auth::user()->kantor,
+                'petugas_pengirim_id' => Auth::id(),
+                'status'              => 'menunggu',
+                'simkim_snapshot'     => $sync->data_snapshot,
+            ]);
+
+            $sync->update([
+                'sudah_dikirim' => true
+            ]);
+        });
+
+        return back()->with('success', 'Berkas berhasil dikirim dari data sinkronisasi.');
     }
 }

@@ -18,8 +18,8 @@ class DatabaseSeeder extends Seeder
         \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=0');
         // ========== SEEDER UNTUK USER ==========
         $this->call([
-            UserSeeder::class,
-            LemariLokerSeeder::class,
+            KantorUserSeeder::class,
+            // LemariLokerSeeder::class,
             PengirimanBerkasSeeder::class,
             ArsipSeeder::class,
         ]);
@@ -30,29 +30,5 @@ class DatabaseSeeder extends Seeder
         \Illuminate\Support\Facades\DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
         $this->command->info('🎉 Semua seeder berhasil dijalankan!');
-        
-    }
-
-    /**
-     * Create users directly (alternatif method)
-     */
-    private function createUsers(): void
-    {
-        // User Admin
-        User::create([
-            'name' => 'Administrator',
-            'email' => 'admin@kanim.com',
-            'password' => Hash::make('admin123'),
-            'role' => 'admin',
-        ]);
-
-        // User Biasa
-        User::create([
-            'name' => 'User Biasa',
-            'email' => 'user@kanim.com',
-            'password' => Hash::make('user123'),
-            'role' => 'user',
-        ]);
-
     }
 }

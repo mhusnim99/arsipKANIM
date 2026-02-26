@@ -8,18 +8,14 @@ use App\Models\Lemari;
 use App\Models\Loker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\DB;
 use App\Services\LokerAllocator;
 
 class PenerimaanArsipController extends Controller
 {
     /**
-     * Menampilkan daftar pengiriman menunggu penerimaan
+     * Daftar pengiriman menunggu penerimaan
      */
-
-
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -28,12 +24,10 @@ class PenerimaanArsipController extends Controller
             abort(403, 'Akses hanya untuk Petugas Arsip');
         }
 
-        // QUERY UTAMA
         $query = PengirimanBerkas::with('petugasPengirim')
             ->where('status', 'menunggu')
-            ->orderBy('created_at', 'desc');
+            ->orderByDesc('created_at');
 
-        // SEARCH
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
@@ -43,7 +37,6 @@ class PenerimaanArsipController extends Controller
             });
         }
 
-        // FILTER TANGGAL
         if ($request->filled('tanggal_mulai')) {
             $query->whereDate('tanggal_kirim', '>=', $request->tanggal_mulai);
         }
@@ -52,20 +45,19 @@ class PenerimaanArsipController extends Controller
             $query->whereDate('tanggal_kirim', '<=', $request->tanggal_selesai);
         }
 
-        // DATA TABEL
         $pengirimanBerkas = $query->paginate(10);
 
-        // STATISTIK
         $totalMenunggu = PengirimanBerkas::where('status', 'menunggu')->count();
         $totalDiterima = PengirimanBerkas::where('status', 'diterima')->count();
         $totalDitolak  = PengirimanBerkas::where('status', 'ditolak')->count();
 
-        // MASTER DATA
-        $lemaris = Lemari::with('lokers')
+        $lemaris = Lemari::with(['lokers' => function ($q) {
+            $q->where('status', 'aktif')
+                ->orderBy('kolom')
+                ->orderBy('baris');
+        }])
             ->where('status', 'aktif')
             ->get();
-
-        $lokers = Loker::where('status', 'aktif')->get();
 
         return view('admin.penerimaan-arsip', compact(
             'pengirimanBerkas',
@@ -76,43 +68,49 @@ class PenerimaanArsipController extends Controller
         ));
     }
 
-
-    // tampilkan form (modal)
-    public function formTerima($id)
+    /**
+     * Proses menerima arsip
+     */
+    public function terima($id)
     {
-        $pengiriman = PengirimanBerkas::findOrFail($id);
-        $lemaris = Lemari::where('status', 'aktif')->get();
-
-        return view('penerimaan-arsip.modal-terima', compact('pengiriman', 'lemaris'));
-    }
-    public function terima(Request $request, $id)
-    {
-        $request->validate([
-            'lemari_id' => 'nullable|exists:lemaris,id',
-            'loker_id'  => 'nullable|exists:lokers,id',
-        ]);
-
-        DB::transaction(function () use ($request, $id) {
+        $result = DB::transaction(function () use ($id) {
 
             $pengiriman = PengirimanBerkas::lockForUpdate()->findOrFail($id);
-            // $loker = $request->filled('loker_id')
-            //     ? Loker::lockForUpdate()->findOrFail($request->loker_id)
-            //     : LokerAllocator::pick();
 
-            // if (! $loker) {
-            //     abort(422, 'Tidak ada loker tersedia');
-            // }
-            $loker = LokerAllocator::pick();
-
-            if (! $loker) {
-                abort(422, 'Tidak ada loker tersedia di seluruh lemari');
+            if ($pengiriman->status !== 'menunggu') {
+                throw new \Exception('Berkas sudah diproses');
             }
 
-            $nomorArsip = $loker->generateNomorArsip();
+            // 🔹 Ambil snapshot SIMKIM
+            $snapshot = $pengiriman->simkim_snapshot;
 
+            if (!$snapshot || !isset($snapshot['permohonan'])) {
+                throw new \Exception('Snapshot SIMKIM tidak ditemukan');
+            }
+
+            $permohonan = $snapshot['permohonan'];
+
+            // 🔹 Cari loker aktif yang masih punya slot
+            $loker = Loker::lockForUpdate()
+                ->where('status', 'aktif')
+                ->get()
+                ->first(function ($l) {
+                    return $l->jumlahArsip() < $l->kapasitas;
+                });
+
+            if (!$loker) {
+                throw new \Exception('Tidak ada loker aktif');
+            }
+
+            // 🔹 Generate nomor arsip otomatis
+            $nomorUrut = $loker->jumlahArsip() + 1;
+            $nomorFormatted = str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
+            $nomorArsip = "{$loker->kode_loker}.{$nomorFormatted}";
+
+            // 🔹 Simpan arsip (sekarang pakai data snapshot)
             $arsip = Arsip::create([
                 'pengiriman_berkas_id' => $pengiriman->id,
-                'kode_permohonan'      => $pengiriman->kode_permohonan,
+                'kode_permohonan'      => $permohonan['nopermohonan'],
                 'nomor_arsip'          => $nomorArsip,
                 'tanggal_masuk'        => now(),
                 'asal_berkas'          => $pengiriman->asal_berkas,
@@ -120,49 +118,61 @@ class PenerimaanArsipController extends Controller
                 'loker_id'             => $loker->id,
                 'status'               => 'tersimpan',
                 'diterima_oleh'        => Auth::id(),
+
+                // OPTIONAL: simpan snapshot lengkap
+                'keterangan'           => json_encode($snapshot),
             ]);
 
-            $loker->refresh();        // ⬅ WAJIB
+            // 🔹 Sync status loker & lemari
             $loker->syncStatus();
-
-            $loker->lemari->refresh(); // ⬅ WAJIB
             $loker->lemari->syncStatus();
 
+            // 🔹 Update pengiriman
             $pengiriman->update([
-                'status'        => 'diterima',
-                'arsip_id'      => $arsip->id,
-                'nomor_arsip'   => $nomorArsip,
-                'diterima_pada' => now(),
-                'diterima_oleh' => Auth::id(),
+                'status'      => 'diterima',
+                'arsip_id'    => $arsip->id,
+                'nomor_arsip' => $nomorArsip,
             ]);
+
+            return [
+                'kode_permohonan' => $permohonan['nopermohonan'],
+                'lokasi' => 'Lemari ' . $loker->lemari->kode_lemari .
+                    ' / Loker ' . $loker->kode_loker,
+                'status' => 'Tersimpan',
+            ];
         });
 
-        return back()->with('success', 'Arsip berhasil diterima');
+        return response()->json([
+            'success' => true,
+            'data'    => $result,
+        ]);
     }
+
     /**
-     * Proses menolak arsip
+     * Tolak arsip
      */
     public function tolak(Request $request, $id)
     {
-        $request->validate([
-            'alasan_penolakan' => 'required'
-        ]);
+        $pengiriman = PengirimanBerkas::findOrFail($id);
 
-        $arsip = Arsip::where('pengiriman_berkas_id', $id)->firstOrFail();
-        $arsip->delete(); // arsip dihapus
+        if ($pengiriman->status !== 'menunggu') {
+            return back()->with('error', 'Data sudah diproses.');
+        }
 
-        PengirimanBerkas::where('id', $id)->update([
+        $pengiriman->update([
             'status' => 'ditolak'
         ]);
+
+        return back()->with('success', 'Pengiriman ditolak.');
     }
 
     /**
-     * Get loker berdasarkan lemari (AJAX)
+     * Ambil loker berdasarkan lemari (AJAX)
      */
     public function getLokersByLemari(Lemari $lemari)
     {
         $lokers = $lemari->lokers()
-            ->whereIn('status', ['aktif']) // ❗ hanya yang bisa diisi
+            ->where('status', 'aktif')
             ->whereColumn(
                 'kapasitas',
                 '>',
@@ -174,31 +184,26 @@ class PenerimaanArsipController extends Controller
 
         return response()->json(
             $lokers->map(fn($loker) => [
-                'id' => $loker->id,
+                'id'         => $loker->id,
                 'kode_loker' => $loker->kode_loker,
             ])
         );
     }
 
     /**
-     * Menampilkan detail pengiriman
+     * Detail pengiriman
      */
     public function show($id)
     {
-        $pengiriman = PengirimanBerkas::with('petugasPengirim')->findOrFail($id);
+        $pengiriman = PengirimanBerkas::findOrFail($id);
 
-        // PERBAIKAN: Pastikan response dalam format JSON yang benar
         return response()->json([
             'success' => true,
             'data' => [
-                'id' => $pengiriman->id,
                 'kode_permohonan' => $pengiriman->kode_permohonan,
-                'asal_berkas' => $pengiriman->asal_berkas,
-                'tanggal_kirim' => $pengiriman->tanggal_kirim,
-                'catatan' => $pengiriman->catatan,
-                'created_at' => $pengiriman->created_at,
-                'petugas_pengirim' => $pengiriman->petugasPengirim,
-                'status' => $pengiriman->status
+                'asal_berkas'     => $pengiriman->asal_berkas,
+                'status'          => $pengiriman->status,
+                'simkim'          => $pengiriman->simkim_snapshot,
             ]
         ]);
     }

@@ -17,7 +17,9 @@ class ManajemenLokasiController extends Controller
     {
         abort_unless(Auth::user()->role === 'admin', 403);
 
-        $lemaris = Lemari::orderBy('kode_lemari')->paginate(10);
+        $lemaris = Lemari::orderByRaw(
+            "CAST(SUBSTRING(kode_lemari, 2) AS UNSIGNED) ASC"
+        )->paginate(10);
 
         return view('admin.manajemen-lemari', compact('lemaris'));
     }
@@ -33,7 +35,6 @@ class ManajemenLokasiController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'kode_lemari' => 'required|string|max:10|unique:lemaris,kode_lemari',
             'nama_lemari' => 'required|string|max:100',
             'keterangan'  => 'nullable|string|max:500',
         ]);
@@ -42,7 +43,7 @@ class ManajemenLokasiController extends Controller
 
             // 🔹 Lemari hanya struktur (BUKAN kapasitas arsip)
             $lemari = Lemari::create([
-                'kode_lemari' => strtoupper(trim($request->kode_lemari)),
+                // 'kode_lemari' => strtoupper(trim($request->kode_lemari)),
                 'nama_lemari' => trim($request->nama_lemari),
                 'jumlah_kolom' => 3,
                 'jumlah_baris_per_kolom' => 10,

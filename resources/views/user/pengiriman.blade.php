@@ -3,10 +3,17 @@
 @section('main-content')
 <div class="container-fluid">
 
-    <h1 class="h3 mb-4 text-gray-800">
-        <i class="fas fa-paper-plane mr-2"></i>Pengiriman Berkas Paspor
-    </h1>
+    {{-- ================= HEADER ================= --}}
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 font-weight-bold" style="color:#1E3A8A;">
+            Pengiriman Arsip
+        </h1>
 
+        <span class="badge px-4 py-2 shadow-sm" style="background:#1E3A8A; color:white;">
+            <i class="fas fa-upload mr-1"></i> Kirim Berkas
+        </span>
+    </div>
+    <div class="container-fluid">
     {{-- NOTIFIKASI --}}
     @if (session('success'))
         <div class="alert alert-success">{{ session('success') }}</div>
@@ -82,25 +89,78 @@
                 </table>
 
                 {{-- ================= TOMBOL KIRIM ================= --}}
-                @if ($permohonan['alurterakhir'] === 'SELESAI')
-                    <form method="POST" action="{{ route('user.pengiriman.store') }}">
-                        @csrf
-                        <input type="hidden" name="kode_permohonan"
-                               value="{{ $permohonan['nopermohonan'] }}">
+                <form method="POST" action="{{ route('user.pengiriman.store') }}">
+                    @csrf
+                    <input type="hidden" name="kode_permohonan"
+                        value="{{ $permohonan['nopermohonan'] }}">
 
-                        <button class="btn btn-success">
-                            <i class="fas fa-paper-plane mr-1"></i> Kirim Berkas
-                        </button>
-                    </form>
-                @else
-                    <button class="btn btn-secondary"
-                            onclick="alert('Proses belum SELESAI di SIMKIM. Silakan selesaikan terlebih dahulu.')">
-                        Kirim Berkas
+                    <input type="hidden" name="simkim_snapshot"
+                       value='@json($data)'>
+                    <button class="btn btn-success">
+                        <i class="fas fa-paper-plane mr-1"></i> Kirim Berkas
                     </button>
+                </form>
+            </div>
+        </div>
+    @endif
+        {{-- <h4>Data Hasil Sinkronisasi Otomatis</h4> --}}
+
+    @if(isset($syncData) && $syncData->count())
+        <div class="card shadow mt-4">
+            <div class="card-header bg-secondary text-white">
+                <strong>Data Hasil Sinkronisasi Otomatis</strong>
+            </div>
+
+            <div class="card-body">
+                @if($syncData->count())
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th>Kode Permohonan</th>
+                                    <th>Status</th>
+                                    <th width="120">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($syncData as $item)
+                                    <tr>
+                                        <td>{{ $item->kode_permohonan }}</td>
+                                        <td>
+                                            <span class="badge badge-info">
+                                                {{ $item->status_proses }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <form method="POST"
+                                                action="{{ route('user.pengiriman.sync', $item->id) }}">
+                                                @csrf
+                                                <button class="btn btn-sm btn-success">
+                                                    <i class="fas fa-paper-plane"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @else
+                    <p class="text-muted">Tidak ada data sinkronisasi tersedia.</p>
                 @endif
             </div>
         </div>
     @endif
-
 </div>
+</div>
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('tanggal_kirim').max = today;
+    });
+</script>
+@endsection
+
 @endsection

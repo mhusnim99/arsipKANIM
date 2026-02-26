@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use App\Models\Arsip;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -13,11 +12,15 @@ class Loker extends Model
     protected $fillable = [
         'kode_loker',
         'lemari_id',
+        'kapasitas',
         'kolom',
         'baris',
-        'kapasitas',
         'status',
         'keterangan',
+    ];
+
+    protected $casts = [
+        'kapasitas' => 'integer',
     ];
 
     /* ================= RELATION ================= */
@@ -32,13 +35,6 @@ class Loker extends Model
         return $this->hasMany(Arsip::class);
     }
 
-    /* ================= SCOPE ================= */
-
-    public function scopeTersedia($query)
-    {
-        return $query->where('status', 'aktif');
-    }
-
     /* ================= HELPER ================= */
 
     public function jumlahArsip(): int
@@ -51,42 +47,34 @@ class Loker extends Model
         return $this->jumlahArsip() < $this->kapasitas;
     }
 
-    /**
-     * Sinkronisasi status loker (WAJIB DIPANGGIL)
-     */
+    /* ================= SYNC STATUS ================= */
+
     public function syncStatus(): void
     {
-        if ($this->status === 'nonaktif') return;
+        if ($this->status === 'nonaktif') {
+            return;
+        }
 
-        $this->update([
-            'status' => $this->jumlahArsip() >= $this->kapasitas
-                ? 'penuh'
-                : 'aktif'
-        ]);
+        $this->status = $this->jumlahArsip() >= $this->kapasitas
+            ? 'penuh'
+            : 'aktif';
+
+        $this->save();
     }
-
 
     /* ================= DISPLAY ================= */
-
-    public function getBarisFormattedAttribute(): string
-    {
-        return str_pad($this->baris, 2, '0', STR_PAD_LEFT);
-    }
 
     public function getDisplayAttribute(): string
     {
         $this->loadMissing('lemari');
-
         return "{$this->lemari->kode_lemari}.{$this->kolom}{$this->baris}";
     }
-
-    /* ================= BADGE ================= */
 
     public function getStatusBadgeAttribute(): string
     {
         return match ($this->status) {
             'aktif'     => 'success',
-            'penuh'     => 'warning',
+            'penuh'     => 'danger',
             'nonaktif'  => 'secondary',
             default     => 'secondary',
         };
@@ -94,23 +82,6 @@ class Loker extends Model
 
     public function getStatusTextAttribute(): string
     {
-        return match ($this->status) {
-            'aktif'     => 'Aktif',
-            'penuh'     => 'Penuh',
-            'nonaktif'  => 'Nonaktif',
-            default     => ucfirst($this->status),
-        };
-    }
-
-    /* ================= NOMOR ARSIP ================= */
-
-    public function generateNomorArsip(): string
-    {
-        $this->loadMissing('lemari');
-
-        $urutan = $this->arsips()->count() + 1;
-        $urutanFormatted = str_pad($urutan, 4, '0', STR_PAD_LEFT);
-
-        return "{$this->lemari->kode_lemari}.{$this->kolom}{$this->baris}.{$urutanFormatted}";
+        return ucfirst($this->status);
     }
 }

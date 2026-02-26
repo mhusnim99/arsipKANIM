@@ -22,7 +22,7 @@ class CreateLokersTable extends Migration
             $table->integer('baris');   // 1–10
 
             // ✅ STATUS KHUSUS LOKER
-            $table->enum('status', ['kosong', 'terisi', 'rusak'])->default('kosong');
+            $table->enum('status', ['nonaktif', 'penuh', 'aktif'])->default('aktif');
 
             // ✅ KAPASITAS DINAMIS PER LOKER
             $table->integer('kapasitas')->default(1);

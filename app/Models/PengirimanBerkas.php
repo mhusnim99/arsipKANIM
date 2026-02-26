@@ -24,13 +24,15 @@ class PengirimanBerkas extends Model
         'ditolak_pada',
         'nomor_arsip',
         'lemari_id',
-        'loker_id'
+        'loker_id',
+        'simkim_snapshot',
     ];
 
     protected $casts = [
         'tanggal_kirim' => 'date',
         'diterima_pada' => 'datetime',
         'ditolak_pada' => 'datetime',
+        'simkim_snapshot' => 'array',
     ];
 
     /**

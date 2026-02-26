@@ -2,200 +2,195 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
-    <!-- Required meta tags -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="Laravel SB Admin 2">
-    <meta name="author" content="Alejandro RH">
 
-    <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-
     <title>{{ config('app.name', 'Laravel') }}</title>
 
     <!-- Fonts -->
     <link href="{{ asset('vendor/fontawesome-free/css/all.min.css') }}" rel="stylesheet">
-    <link
-        href="https://fonts.googleapis.com/css?family=Nunito:200,200i,300,300i,400,400i,600,600i,700,700i,800,800i,900,900i"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Nunito:200,300,400,600,700,800,900" rel="stylesheet">
 
     <!-- Styles -->
     <link href="{{ asset('css/sb-admin-2.min.css') }}" rel="stylesheet">
 
-    <!-- Favicon -->
-    <link href="{{ asset('img/favicon.png') }}" rel="icon" type="image/png">
-    <!-- Datepicker CSS -->
-    <link rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-datepicker/1.9.0/css/bootstrap-datepicker.min.css">
+    <style>
+        /* ============ SIDEBAR CUSTOM UI ============ */
+   .sidebar {
+    background: linear-gradient(180deg, #1E3A8A, #374785); /* navy gradient */
+}
 
-    <!-- DataTables CSS -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.10.20/css/dataTables.bootstrap4.min.css">
+.sidebar .nav-item .nav-link {
+    color: rgba(255,255,255,.9);
+    border-radius: 12px;
+    margin: 4px 10px;
+    transition: .3s;
+}
 
-    <!-- Scripts di atas sb-admin-2.min.js -->
-    <!-- jQuery (SUDAH BENAR) -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+.sidebar .nav-item .nav-link:hover {
+    background: rgba(255,255,255,.15);
+    transform: translateX(4px);
+}
 
-    <!-- Bootstrap 4 Bundle (INI YANG HILANG 🔥) -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Core JavaScript -->
-    <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
-    <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
-    <script src="https://cdn.datatables.net/1.10.20/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.20/js/dataTables.bootstrap4.min.js"></script>
-    <!-- Scripts SB Admin 2 -->
-    <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
-    @yield('scripts')
+.sidebar .nav-item.active .nav-link {
+    background: linear-gradient(135deg, #3B82F6, #1E40AF); /* sedikit kontras */
+    box-shadow: 0 4px 15px rgba(0,0,0,.15);
+}
+
+.topbar {
+    background: linear-gradient(90deg, #1E3A8A, #374785);
+}
+
+.avatar {
+    background: linear-gradient(135deg, #f6d365, #fda085); /* tetap emas/kuning */
+    color: #fff;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    width:38px;
+    height:38px;
+    font-weight:700;
+}
+
+
+    </style>
+
+    @stack('styles')
 </head>
 
 <body id="page-top">
 
-    <!-- Page Wrapper -->
-    <div id="wrapper">
-        <!-- Sidebar -->
-        <ul class="navbar-nav bg-gradient-primary sidebar sidebar-dark accordion" id="accordionSidebar">
+<div id="wrapper">
 
-            <!-- Sidebar - Brand -->
-            <a class="sidebar-brand d-flex align-items-center justify-content-center" href="{{ url('/home') }}">
-                <div class="sidebar-brand-icon rotate-n-15">
-                    <i class="fas fa-laugh-wink"></i>
-                </div>
-                <div class="sidebar-brand-text mx-3">SB Admin <sup>2</sup></div>
+    <!-- Sidebar -->
+    <ul class="navbar-nav sidebar sidebar-dark accordion" id="accordionSidebar">
+
+        <a class="sidebar-brand d-flex align-items-center justify-content-center py-4" href="{{ url('/home') }}">
+            <div class="sidebar-brand-icon">
+                <img src="{{ asset('img/logo_imigrasi.png') }}" style="width:38px">
+            </div>
+            <div class="sidebar-brand-text mx-3 text-uppercase">
+                Sistem Arsiparis
+            </div>
+        </a>
+
+        <hr class="sidebar-divider my-0">
+
+        <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.dashboard') }}">
+                <i class="fas fa-fw fa-chart-pie"></i>
+                <span>Dashboard</span>
             </a>
+        </li>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider my-0">
+        <li class="nav-item {{ request()->routeIs('admin.penerimaan-arsip.index') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.penerimaan-arsip.index') }}">
+                <i class="fas fa-fw fa-inbox"></i>
+                <span>Menerima Arsip</span>
+            </a>
+        </li>
 
-            <!-- Nav Item - Dashboard -->
-            <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.dashboard') }}">
-                    <i class="fas fa-fw fa-tachometer-alt"></i>
-                    <span>{{ __('Dashboard') }}</span>
-                </a>
-            </li>
-            <!-- Nav Item - Menerima Arsip -->
-            <li class="nav-item {{ request()->routeIs('admin.penerimaan-arsip.index') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.penerimaan-arsip.index') }}">
-                    <i class="fas fa-fw fa-inbox"></i>
-                    <span>{{ __('Menerima Arsip') }}</span>
-                </a>
-            </li>
-            <!-- Nav Item - Manajemen Lemari -->
-            <li class="nav-item {{ request()->routeIs('admin.manajemen-lemari.index') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.manajemen-lemari.index') }}">
-                    <i class="fas fa-fw fa-inbox"></i>
-                    <span>{{ __('Manajemen Lemari') }}</span>
-                </a>
-            </li>
+        <li class="nav-item {{ request()->routeIs('admin.manajemen-lemari.index') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.manajemen-lemari.index') }}">
+                <i class="fas fa-fw fa-archive"></i>
+                <span>Manajemen Lemari</span>
+            </a>
+        </li>
 
-            <li class="nav-item {{ request()->routeIs('admin.arsip.index') ? 'active' : '' }}">
-                <a class="nav-link" href="{{ route('admin.arsip.index') }}">
-                    <i class="fas fa-fw fa-inbox"></i>
-                    <span>{{ __('Manajemen Arsip') }}</span>
-                </a>
-            </li>
+        <li class="nav-item {{ request()->routeIs('admin.arsip.index') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.arsip.index') }}">
+                <i class="fas fa-fw fa-folder-open"></i>
+                <span>Manajemen Arsip</span>
+            </a>
+        </li>
 
-            <!-- Divider -->
-            <hr class="sidebar-divider d-none d-md-block">
+        <hr class="sidebar-divider d-none d-md-block">
 
-            <!-- Sidebar Toggler (Sidebar) -->
-            <div class="text-center d-none d-md-inline">
-                <button class="rounded-circle border-0" id="sidebarToggle"></button>
-            </div>
+        <div class="text-center d-none d-md-inline">
+            <button class="rounded-circle border-0 bg-navy" id="sidebarToggle"></button>
+        </div>
 
-        </ul>
-        <!-- End of Sidebar -->
+    </ul>
+    <!-- End Sidebar -->
 
-        <!-- Content Wrapper -->
-        <div id="content-wrapper" class="d-flex flex-column">
+    <div id="content-wrapper" class="d-flex flex-column">
 
-            <!-- Main Content -->
-            <div id="content">
+        <div id="content">
 
-                <!-- Topbar -->
-                <nav class="navbar navbar-expand navbar-light bg-white topbar mb-4 static-top shadow">
+            <!-- Topbar -->
+            <nav class="navbar navbar-expand navbar-light topbar mb-4 static-top shadow">
+                <ul class="navbar-nav ml-auto">
 
-                    <!-- Topbar Navbar -->
-                    <ul class="navbar-nav ml-auto">
-                        <div class="topbar-divider d-none d-sm-block"></div>
-
-                        <!-- Nav Item - User Information -->
-                        <li class="nav-item dropdown no-arrow">
-                            <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                <span
-                                    class="mr-2 d-none d-lg-inline text-gray-600 small">{{ Auth::user()->name }}</span>
-                                <figure class="img-profile rounded-circle avatar font-weight-bold"
-                                    data-initial="{{ Auth::user()->name[0] }}"></figure>
-                            </a>
-                            <!-- Dropdown - User Information -->
-                            <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in"
-                                aria-labelledby="userDropdown">
-                                <div class="dropdown-divider"></div>
-                                <a class="dropdown-item" href="#" data-toggle="modal" data-target="#logoutModal">
-                                    <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2 text-gray-400"></i>
-                                    {{ __('Logout') }}
-                                </a>
+                    <li class="nav-item dropdown no-arrow">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown"
+                           role="button" data-toggle="dropdown">
+                            <span class="mr-2 d-none d-lg-inline small font-weight-bold">
+                                {{ Auth::user()->name }}
+                            </span>
+                            <div class="img-profile rounded-circle avatar">
+                                {{ strtoupper(Auth::user()->name[0]) }}
                             </div>
-                        </li>
-                    </ul>
+                        </a>
 
-                </nav>
-                <!-- End of Topbar -->
+                        <div class="dropdown-menu dropdown-menu-right shadow animated--grow-in">
+                            <a class="dropdown-item text-danger" href="#"
+                               data-toggle="modal" data-target="#logoutModal">
+                                <i class="fas fa-sign-out-alt fa-sm fa-fw mr-2"></i>
+                                Logout
+                            </a>
+                        </div>
+                    </li>
 
-                <!-- Begin Page Content -->
-                <div class="container-fluid">
+                </ul>
+            </nav>
 
-                    @yield('main-content')
-
-                </div>
-                <!-- /.container-fluid -->
-
+            <div class="container-fluid">
+                @yield('main-content')
             </div>
-            <!-- End of Main Content -->
 
-
-
-        </div>
-        <!-- End of Content Wrapper -->
-
-    </div>
-
-    <!-- Scroll to Top Button-->
-    <a class="scroll-to-top rounded" href="#page-top">
-        <i class="fas fa-angle-up"></i>
-    </a>
-
-    <!-- Logout Modal-->
-    <div class="modal fade" id="logoutModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">{{ __('Ready to Leave?') }}</h5>
-                    <button class="close" type="button" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">×</span>
-                    </button>
-                </div>
-                <div class="modal-body">Select "Logout" below if you are ready to end your current session.</div>
-                <div class="modal-footer">
-                    <button class="btn btn-link" type="button" data-dismiss="modal">{{ __('Cancel') }}</button>
-                    <a class="btn btn-danger" href="{{ route('logout') }}"
-                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">{{ __('Logout') }}</a>
-                    <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
-                        @csrf
-                    </form>
-                </div>
-            </div>
         </div>
     </div>
 
-    <!-- Scripts -->
-    <script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
-    <script src="{{ asset('vendor/bootstrap/js/bootstrap.min.js') }}"></script>
-    <script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
-    <script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
-    @yield('scripts')
+</div>
+
+<!-- Scroll to Top -->
+<a class="scroll-to-top rounded" href="#page-top">
+    <i class="fas fa-angle-up"></i>
+</a>
+
+<!-- Logout Modal -->
+<div class="modal fade" id="logoutModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content shadow-lg">
+            <div class="modal-header bg-gradient-danger text-white">
+                <h5 class="modal-title">Logout</h5>
+                <button class="close text-white" type="button" data-dismiss="modal">
+                    <span>×</span>
+                </button>
+            </div>
+            <div class="modal-body">Yakin ingin keluar dari sistem?</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" type="button" data-dismiss="modal">Batal</button>
+                <a class="btn btn-danger" href="{{ route('logout') }}"
+                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    Logout
+                </a>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                    @csrf
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="{{ asset('vendor/jquery/jquery.min.js') }}"></script>
+<script src="{{ asset('vendor/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+<script src="{{ asset('vendor/jquery-easing/jquery.easing.min.js') }}"></script>
+<script src="{{ asset('js/sb-admin-2.min.js') }}"></script>
+
+@yield('scripts')
+
 </body>
-
 </html>

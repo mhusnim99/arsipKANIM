@@ -21,6 +21,14 @@ class Arsip extends Model
         'petugas_pengirim_id',
         'diterima_oleh',
         'status',
+        'dipinjam_oleh',
+        'keperluan',
+        'tanggal_pinjam',
+        'dimusnahkan_oleh',
+        'tanggal_musnah',
+        'nomor_paspor',
+        'nama_lengkap',
+        'tanggal_lahir',
     ];
 
     protected $casts = [
@@ -83,8 +91,7 @@ class Arsip extends Model
         return match ($this->status) {
             'tersimpan' => 'success',
             'dipinjam'  => 'warning',
-            'hilang'    => 'danger',
-            'musnah'    => 'secondary',
+            'musnah'    => 'danger',
             default     => 'secondary',
         };
     }
