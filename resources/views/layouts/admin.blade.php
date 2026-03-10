@@ -90,7 +90,6 @@
                 <span>Menerima Arsip</span>
             </a>
         </li>
-
         <li class="nav-item {{ request()->routeIs('admin.manajemen-lemari.index') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('admin.manajemen-lemari.index') }}">
                 <i class="fas fa-fw fa-archive"></i>

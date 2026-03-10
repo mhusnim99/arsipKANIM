@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArsipController;
+use App\Http\Controllers\BeritaAcaraController;
 use App\Http\Controllers\CekPermohonanController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\DashboardController;
@@ -19,13 +20,27 @@ require __DIR__ . '/auth.php';
 |--------------------------------------------------------------------------
 */
 Route::get('/', function () {
+
     if (!Auth::check()) {
         return redirect()->route('login');
     }
 
-    return Auth::user()->role === 'admin'
-        ? redirect()->route('admin.dashboard')
-        : redirect()->route('user.pengiriman');
+    $user = Auth::user();
+
+    if ($user->role === 'admin') {
+        return redirect()->route('admin.dashboard');
+    }
+
+    if ($user->role === 'petugas_arsip') {
+        return redirect()->route('admin.penerimaan-arsip.index');
+    }
+
+    if ($user->role === 'user') {
+        return redirect()->route('user.pengiriman');
+    }
+
+    return redirect()->route('login');
+
 });
 
 /*
@@ -115,6 +130,29 @@ Route::middleware('auth')->group(function () {
         });
     });
 
+        /*
+    |--------------------------------------------------------------------------
+    | PETUGAS ARSIP ROUTES
+    |--------------------------------------------------------------------------
+    */
+
+    Route::prefix('petugas_arsip')->name('petugas_arsip.')->group(function () {
+
+        Route::get('/penerimaan', [PenerimaanArsipController::class, 'index'])
+            ->name('penerimaan');
+
+        Route::post('/penerimaan/{id}/terima', [PenerimaanArsipController::class, 'terima']);
+
+        Route::post('/penerimaan/{id}/tolak', [PenerimaanArsipController::class, 'tolak']);
+
+        Route::get('/arsip', [ArsipController::class, 'index'])
+            ->name('index');
+
+        Route::get('/arsip/{arsip}', [ArsipController::class, 'show'])
+            ->name('show');
+
+    });
+
     /*
     |--------------------------------------------------------------------------
     | USER ROUTES
@@ -141,8 +179,17 @@ Route::middleware('auth')->group(function () {
             ->name('pengiriman.fetch');
         Route::post('/pengiriman/sync/{id}', [PengirimanBerkasController::class, 'kirimDariSync'])
             ->name('user.pengiriman.sync');
+        Route::get('/berita-acara', [BeritaAcaraController::class, 'index'])
+            ->name('berita-acara.index');
+        Route::get('/berita-acara/generate', [BeritaAcaraController::class, 'generate'])
+            ->name('berita-acara.generate');
+        Route::post('/berita-acara/generate',[BeritaAcaraController::class,'generate'])
+            ->name('berita-acara.generate.post');
+        Route::get('/berita-acara/{id}', [BeritaAcaraController::class, 'show'])
+            ->name('berita-acara.show');
+        Route::get('/berita-acara/{id}/pdf', [BeritaAcaraController::class, 'generatePdf'])
+            ->name('berita-acara.pdf');
     });
-
     /*
     |--------------------------------------------------------------------------
     | FALLBACK

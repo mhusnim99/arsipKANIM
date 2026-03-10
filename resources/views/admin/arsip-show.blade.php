@@ -31,6 +31,22 @@
                             <td class="font-weight-bold">{{ $arsip->kode_permohonan }}</td>
                         </tr>
                         <tr>
+                            <th class="bg-light">Nama Lengkap</th>
+                            <td>{{ $arsip->nama_lengkap }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Nomor Paspor</th>
+                            <td>{{ $arsip->nomor_paspor }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Tanggal Permohonan</th>
+                            <td>{{ $arsip->tanggal_permohonan->format('d/m/Y') }}</td>
+                        </tr>
+                        <tr>
+                            <th class="bg-light">Status Proses</th>
+                            <td>{{ $arsip->status_proses }}</td>
+                        </tr>
+                        <tr>
                             <th class="bg-light">Asal Berkas</th>
                             <td>{{ $arsip->asal_berkas }}</td>
                         </tr>

@@ -13,19 +13,18 @@ class KantorUserSeeder extends Seeder
     {
         $users = [
             [
-                'name'   => 'Admin',
+                'name'   => 'Admin Gudang',
                 'last_name' => 'TKIM',
                 'email'  => 'admin@arsip.com',
                 'password' => Hash::make('admin123'),
                 'role'   => 'admin',
-                'role' => 'admin',
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
                 'kantor' => 'TKIM',
             ],
             [
-                'name'   => 'Petugas',
+                'name'   => 'Petugas Kantor Imigrasi Kelas I TPI Surabaya',
                 'last_name' => 'Kanim',
                 'email'  => 'kanim@arsip.com',
                 'password' => Hash::make('kanim123'),
@@ -33,10 +32,10 @@ class KantorUserSeeder extends Seeder
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
-                'kantor' => 'Kanim',
+                'kantor' => 'Kantor Imigrasi Kelas I TPI Surabaya',
             ],
             [
-                'name'   => 'Petugas',
+                'name'   => 'Petugas ULP LTSA MPP Sidoarjo',
                 'last_name' => 'ULP LTSA MPP Sidoarjo',
                 'email'  => 'mpp@arsip.com',
                 'password' => Hash::make('mpp123'),
@@ -47,7 +46,7 @@ class KantorUserSeeder extends Seeder
                 'kantor' => 'ULP LTSA MPP Sidoarjo',
             ],
             [
-                'name'   => 'Petugas',
+                'name'   => 'Petugas Immigration Lounge CIWO',
                 'last_name' => 'Immigration Lounge CIWO',
                 'email'  => 'ciwo@arsip.com',
                 'password' => Hash::make('ciwo123'),
@@ -58,7 +57,7 @@ class KantorUserSeeder extends Seeder
                 'kantor' => 'Immgration Lounge CIWO',
             ],
             [
-                'name'   => 'Petugas',
+                'name'   => 'Petugas ULP Bendul Merisi',
                 'last_name' => 'ULP Bendul Merisi',
                 'email'  => 'bendul@arsip.com',
                 'password' => Hash::make('bendul123'),
@@ -69,7 +68,7 @@ class KantorUserSeeder extends Seeder
                 'kantor' => 'ULP Bendul Merisi',
             ],
             [
-                'name'   => 'Petugas',
+                'name'   => 'Petugas ULP Wiyung',
                 'last_name' => 'ULP Wiyung',
                 'email'  => 'wiyung@arsip.com',
                 'password' => Hash::make('wiyung123'),
@@ -80,7 +79,7 @@ class KantorUserSeeder extends Seeder
                 'kantor' => 'ULP Wiyung',
             ],
             [
-                'name'   => 'Petugas',
+                'name'   => 'Petugas ULP BG Junction',
                 'last_name' => 'ULP BG Junction',
                 'email'  => 'bgj@arsip.com',
                 'password' => Hash::make('bgj123'),
@@ -91,7 +90,7 @@ class KantorUserSeeder extends Seeder
                 'kantor' => 'ULP BG Junction',
             ],
             [
-                'name'   => 'Petugas',
+                'name'   => 'Petugas ULP Mojokerto',
                 'last_name' => 'ULP Mojokerto',
                 'email'  => 'mjk@arsip.com',
                 'password' => Hash::make('mjk123'),
@@ -100,6 +99,17 @@ class KantorUserSeeder extends Seeder
                 'created_at' => now(),
                 'updated_at' => now(),
                 'kantor' => 'ULP Mojokerto',
+            ],
+            [
+                'name'   => 'Petugas Arsip',
+                'last_name' => 'Petugas Arsip',
+                'email'  => 'petugas@arsip.com',
+                'password' => Hash::make('petugas'),
+                'role' => 'petugas_arsip',
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+                'kantor' => 'Kantor Imigrasi Kelas I TPI Surabaya',
             ],
         ];
 

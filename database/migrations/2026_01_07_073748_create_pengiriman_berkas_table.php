@@ -28,7 +28,6 @@ return new class extends Migration
                 ->constrained('users')
                 ->onDelete('cascade');
             $table->timestamps();
-
             $table->index('kode_permohonan');
             $table->index('status');
             $table->index(['tanggal_kirim', 'asal_berkas']);

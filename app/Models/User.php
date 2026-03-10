@@ -61,4 +61,12 @@ class User extends Authenticatable
     {
         return $this->role === 'user';
     }
+    public function isPetugasArsip(): bool
+    {
+        return $this->role === 'petugas_arsip';
+    }
+    public function beritaAcaras()
+    {
+        return $this->hasMany(BeritaAcara::class, 'petugas_pengirim_id');
+    }
 }

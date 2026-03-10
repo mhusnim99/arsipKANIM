@@ -111,6 +111,12 @@
             </a>
         </li>
 
+        <li class="nav-item {{ request()->routeIs('user.pengiriman-riwayat') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('user.pengiriman-riwayat') }}">
+                <i class="fas fa-folder-open"></i>
+                <span>Riwayat pengiriman Berkas</span>
+            </a>
+        </li>
         <hr class="sidebar-divider d-none d-md-block">
 
         <div class="text-center d-none d-md-inline">

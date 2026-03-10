@@ -26,6 +26,7 @@ class PengirimanBerkas extends Model
         'lemari_id',
         'loker_id',
         'simkim_snapshot',
+        'berita_acara_id',
     ];
 
     protected $casts = [
@@ -142,19 +143,8 @@ class PengirimanBerkas extends Model
         return $this->ditolak_pada ? $this->ditolak_pada->format('d-m-Y H:i') : '-';
     }
 
-    /**
-     * Cek apakah bisa diterima
-     */
-    public function canBeAccepted()
+    public function beritaAcara()
     {
-        return $this->status === 'menunggu';
-    }
-
-    /**
-     * Cek apakah bisa ditolak
-     */
-    public function canBeRejected()
-    {
-        return $this->status === 'menunggu';
+        return $this->belongsTo(BeritaAcara::class);
     }
 }

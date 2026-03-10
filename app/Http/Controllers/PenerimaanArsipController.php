@@ -20,7 +20,7 @@ class PenerimaanArsipController extends Controller
     {
         $user = Auth::user();
 
-        if ($user->role !== 'admin') {
+        if ($user->role !== 'admin' && $user->role !== 'petugas_arsip') {
             abort(403, 'Akses hanya untuk Petugas Arsip');
         }
 
@@ -119,8 +119,17 @@ class PenerimaanArsipController extends Controller
                 'status'               => 'tersimpan',
                 'diterima_oleh'        => Auth::id(),
 
-                // OPTIONAL: simpan snapshot lengkap
-                'keterangan'           => json_encode($snapshot),
+                // ===============================
+                // DATA SIMKIM TERSTRUKTUR
+                // ===============================
+
+                'nama_lengkap'         => $permohonan['nama_lengkap'] ?? null,
+                'nomor_paspor'         => $permohonan['nopaspor'] ?? null,
+                'tanggal_permohonan'   => $permohonan['tanggal_permohonan'] ?? null,
+                'status_proses'        => $permohonan['alurterakhir'] ?? null,
+
+                // keterangan sekarang hanya catatan manual
+                'keterangan'           => null,
             ]);
 
             // 🔹 Sync status loker & lemari

@@ -9,12 +9,9 @@
                 <i class="fas fa-history text-primary mr-2"></i>Riwayat Pengiriman Berkas
             </h1>
             <div>
-                <a href="{{ route('user.pengiriman') }}" class="btn btn-primary shadow-sm">
-                    <i class="fas fa-plus-circle mr-2"></i>Kirim Berkas Baru
-                </a>
-                <a href="{{ route('user.pengiriman') }}" class="btn btn-outline-primary shadow-sm">
-                    <i class="fas fa-arrow-left mr-2"></i>Kembali
-                </a>
+                <span class="badge px-4 py-2 shadow-sm" style="background:#1E3A8A; color:white;">
+                    <i class="fas fa-undo"></i> Riwayat Pengiriman
+                </span>
             </div>
         </div>
 
@@ -104,10 +101,38 @@
 
         <!-- Main Table -->
         <div class="card shadow">
-            <div class="card-header py-3">
+            <div class="card-header py-3 d-flex justify-content-between align-items-center">
                 <h6 class="m-0 font-weight-bold text-primary">
                     <i class="fas fa-list mr-2"></i>Daftar Riwayat Pengiriman
                 </h6>
+                @php
+                    $pengirimanMenunggu = \App\Models\PengirimanBerkas::where('petugas_pengirim_id', Auth::id())
+                        ->where('status','menunggu')
+                        ->whereNull('berita_acara_id')
+                        ->exists();
+
+                    $beritaAcaraTerakhir = \App\Models\BeritaAcara::where('petugas_pengirim_id', Auth::id())
+                        ->latest()
+                        ->first();
+                @endphp
+                    @if($pengirimanMenunggu > 0)
+
+                    <form action="{{ route('user.berita-acara.generate') }}" method="POST">
+                        @csrf
+                        <button class="btn btn-success btn-sm">
+                            <i class="fas fa-file-signature mr-1"></i>
+                            Generate Berita Acara
+                        </button>
+                    </form>
+
+                    @elseif($beritaAcaraTerakhir)
+
+                    <a href="{{ route('user.berita-acara.pdf',$beritaAcaraTerakhir->id) }}"
+                    class="btn btn-primary btn-sm">
+                        <i class="fas fa-download mr-1"></i>
+                        Download Berita Acara
+                    </a>
+                @endif
             </div>
             <div class="card-body">
                 @if ($riwayat->count() > 0)

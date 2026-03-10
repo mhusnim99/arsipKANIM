@@ -63,6 +63,10 @@
             <div class="card-body">
                 <table class="table table-bordered">
                     <tr>
+                        <th>Kode Permohonan</th>
+                        <td>{{ $permohonan['nopermohonan'] }}</td>
+                    </tr>
+                    <tr>
                         <th>Nama Lengkap</th>
                         <td>{{ $permohonan['nama_lengkap'] }}</td>
                     </tr>

@@ -26,15 +26,17 @@ class Arsip extends Model
         'tanggal_pinjam',
         'dimusnahkan_oleh',
         'tanggal_musnah',
-        'nomor_paspor',
         'nama_lengkap',
-        'tanggal_lahir',
+        'nomor_paspor',
+        'tanggal_permohonan',
+        'status_proses',
     ];
 
     protected $casts = [
         'tanggal_masuk' => 'date',
         'created_at'    => 'datetime',
         'updated_at'    => 'datetime',
+        'tanggal_permohonan' => 'date',
     ];
 
     /* =====================
