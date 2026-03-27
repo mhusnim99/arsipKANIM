@@ -144,7 +144,18 @@
                         @foreach ($loker->arsips as $i => $arsip)
                             <tr>
                                 <td>{{ $i + 1 }}</td>
-                                <td><strong>{{ $arsip->nomor_arsip }}</strong></td>
+
+                                @php
+                                    $slot = ceil(($i + 1) / 10);
+                                    $start = ($slot - 1) * 10 + 1;
+                                    $end = $slot * 10;
+                                @endphp
+                                <td>
+                                    <span class="badge badge-primary px-3 py-1">
+                                        Slot {{ $slot }} ({{ $start }}-{{ $end }})
+                                    </span>
+                                </td>
+
                                 <td>{{ $arsip->kode_permohonan }}</td>
                                 <td>{{ $arsip->asal_berkas }}</td>
                                 <td>{{ \Carbon\Carbon::parse($arsip->tanggal_masuk)->format('d/m/Y') }}</td>

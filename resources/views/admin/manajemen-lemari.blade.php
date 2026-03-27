@@ -79,6 +79,7 @@
                                     </span>
                                 </td>
 
+
                                 <td>
                                     <span class="badge badge-primary px-3">
                                         {{ $totalKapasitas }}

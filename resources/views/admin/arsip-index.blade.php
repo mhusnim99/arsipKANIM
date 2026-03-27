@@ -70,7 +70,6 @@
                     <tr>
                         <th width="5%">No</th>
                         <th>Kode</th>
-                        <th>Slot</th>
                         <th>Lokasi</th>
                         <th>Tanggal</th>
                         <th>Status</th>
@@ -85,15 +84,7 @@
                             <td class="font-weight-bold">{{ $arsip->kode_permohonan }}</td>
                             <td><span class="badge badge-light border">{{ $arsip->nomor_arsip }}</span></td>
 
-                            <td>
-                                @if ($arsip->lemari && $arsip->loker)
-                                    <span class="badge badge-info">
-                                        {{ $arsip->lemari->kode_lemari }} / {{ $arsip->loker->kode_loker }}
-                                    </span>
-                                @else
-                                    <span class="text-muted">-</span>
-                                @endif
-                            </td>
+
 
                             <td>{{ $arsip->tanggal_masuk->format('d/m/Y') }}</td>
 
@@ -110,6 +101,7 @@
                                         <i class="fas fa-eye"></i>
                                     </a>
 
+                                    @if($arsip->status !== 'musnah' || auth()->user()->role === 'admin')
                                     <div class="dropdown">
                                         <button class="btn btn-secondary btn-sm dropdown-toggle px-3"
                                                 type="button"
@@ -129,6 +121,8 @@
                                             </button>
                                         </div>
                                     </div>
+</div>
+@endif
                                 </div>
                             </td>
                         </tr>

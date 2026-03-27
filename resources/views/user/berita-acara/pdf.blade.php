@@ -5,52 +5,57 @@
 
 <style>
 
+/* ================= GLOBAL ================= */
+
 body{
     font-family: DejaVu Sans;
-    font-size:11px;
-    margin-top:40px;
-    margin-bottom:40px;
-    margin-left:60px;
-    margin-right:60px;
+    font-size:10px;
     line-height:1.6;
+    margin:40px 60px;
 }
 
 /* ================= KOP SURAT ================= */
 
+.kop-table{
+    width:100%;
+}
+
+.logo{
+    width:85px;
+}
+
 .nama-instansi{
-    font-size:12px;
+    font-size:10px;
     font-weight:bold;
-    line-height:1.4;
+    line-height:1.3;
+    letter-spacing:0.3px;
 }
 
 .alamat{
     font-size:9px;
-    line-height:1.4;
-}
-
-.kop-table{
-    width:100%;
-    margin-bottom:5px;
-}
-
-.logo{
-    width:80px;
-}
-
-.kop-text{
-    text-align:center;
-}
-
-.kop-text p{
-    margin:2px;
 }
 
 .garis{
     border-top:3px solid black;
     border-bottom:1px solid black;
     height:4px;
-    margin-top:6px;
-    margin-bottom:15px;
+    margin-top:8px;
+    margin-bottom:18px;
+}
+
+/* ================= JUDUL ================= */
+
+.judul{
+    text-align:center;
+    font-weight:bold;
+    font-size:10px;
+    margin-bottom:3px;
+}
+
+.nomor{
+    text-align:center;
+    font-size:10px;
+    margin-bottom:20px;
 }
 
 /* ================= PARAGRAF ================= */
@@ -64,27 +69,27 @@ p{
 
 table{
     width:100%;
-    border-collapse: collapse;
+    border-collapse:collapse;
 }
 
 th{
     border:1px solid black;
-    padding:6px;
-    font-size:11px;
+    padding:7px;
     font-weight:bold;
     text-align:center;
 }
 
 td{
     border:1px solid black;
-    padding:5px;
-    font-size:11px;
+    padding:6px;
 }
 
 .no-border td{
     border:none;
     padding:2px 4px;
 }
+
+/* ================= ALIGN ================= */
 
 .center{
     text-align:center;
@@ -94,18 +99,30 @@ td{
     text-align:right;
 }
 
-/* ================= SPACING SECTION ================= */
+/* ================= SECTION ================= */
 
 .section{
     margin-top:15px;
 }
 
+/* ================= TABLE ARSIP ================= */
+
+.table-arsip th{
+    background:#f2f2f2;
+}
+
+/* ================= TTD ================= */
+
 .signature{
-    margin-top:50px;
+    margin-top:60px;
+}
+
+.ttd-nama{
+    margin-top:60px;
+    font-weight:bold;
 }
 
 </style>
-
 </head>
 
 <body>
@@ -117,24 +134,31 @@ td{
 <tr>
 
 <td width="90">
-
 <img src="{{ public_path('img/logo_imigrasi.png') }}" class="logo">
-
 </td>
 
-<td>
+<td class="center">
 
-<p class="nama-instansi">
-KEMENTERIAN IMIGRASI DAN PEMASYARAKATAN REPUBLIK INDONESIA<br>
-DIREKTORAT JENDERAL IMIGRASI<br>
-KANTOR WILAYAH JAWA TIMUR<br>
+<div class="nama-instansi">
+KEMENTERIAN IMIGRASI DAN PEMASYARAKATAN REPUBLIK INDONESIA
+</div>
+
+<div class="nama-instansi">
+DIREKTORAT JENDERAL IMIGRASI
+</div>
+
+<div class="nama-instansi">
+KANTOR WILAYAH JAWA TIMUR
+</div>
+
+<div class="nama-instansi">
 KANTOR IMIGRASI KELAS I KHUSUS TPI SURABAYA
-</p>
+</div>
 
-<p>
+<div class="alamat">
 Jl. Raya Juanda Km.3 Sidoarjo, Jawa Timur<br>
 Website: surabaya.imigrasi.go.id
-</p>
+</div>
 
 </td>
 
@@ -144,16 +168,26 @@ Website: surabaya.imigrasi.go.id
 
 <div class="garis"></div>
 
+<!-- ================= JUDUL ================= -->
+
+<div class="judul">
+BERITA ACARA SERAH TERIMA ARSIP
+</div>
+
+<div class="nomor">
+Nomor : {{ $beritaAcara->nomor ?? '-' }}
+</div>
+
 
 <!-- ================= PARAGRAF PEMBUKA ================= -->
 
 <p>
-Kami yang bertanda tangan dibawah ini, pada hari 
-<b>{{ \Carbon\Carbon::parse($beritaAcara->tanggal_dibuat)->translatedFormat('l') }}</b>,
-tanggal 
-<b>{{ \Carbon\Carbon::parse($beritaAcara->tanggal_dibuat)->format('d/m/Y') }}</b>.
+Kami yang bertanda tangan di bawah ini, pada hari
+<b>{{ \Carbon\Carbon::parse($beritaAcara->tanggal_dibuat)->locale('id')->translatedFormat('l') }}</b>,
+tanggal
+<b>{{ \Carbon\Carbon::parse($beritaAcara->tanggal_dibuat)->locale('id')->translatedFormat('d F Y') }}</b>,
+telah melaksanakan serah terima arsip dengan keterangan sebagai berikut:
 </p>
-
 
 <!-- ================= PIHAK PERTAMA ================= -->
 
@@ -162,20 +196,20 @@ tanggal
 <table class="no-border">
 
 <tr>
-<td width="120">Nama</td>
-<td>: {{ $beritaAcara->pengirim->name }}</td>
+<td width="130">Nama</td>
+<td>: </td>
 </tr>
 
 <tr>
 <td>Jabatan</td>
-<td>: Petugas Pengirim</td>
+<td>: </td>
 </tr>
 
 </table>
 
 </div>
 
-<p>Selanjutnya disebut <b>Pihak Pertama</b>.</p>
+<p>Selanjutnya disebut sebagai <b>Pihak Pertama</b>.</p>
 
 
 <!-- ================= PIHAK KEDUA ================= -->
@@ -185,34 +219,34 @@ tanggal
 <table class="no-border">
 
 <tr>
-<td width="120">Nama</td>
-<td>: {{ auth()->user()->name }}</td>
+<td width="130">Nama</td>
+<td>: </td>
 </tr>
 
 <tr>
 <td>Jabatan</td>
-<td>: Petugas Arsip</td>
+<td>:</td>
 </tr>
 
 </table>
 
 </div>
 
-<p>Selanjutnya disebut <b>Pihak Kedua</b>.</p>
+<p>Selanjutnya disebut sebagai <b>Pihak Kedua</b>.</p>
 
 
 <p>
-Pihak Pertama telah menyerahkan arsip kepada Pihak Kedua,
-dan Pihak Kedua menyatakan telah menerima arsip dari
-Pihak Pertama dengan rincian sebagai berikut:
+Pihak Pertama telah menyerahkan arsip kepada Pihak Kedua sebanyak
+<b>{{ $beritaAcara->pengirimanBerkas->count() }}</b> berkas, dan Pihak Kedua
+menyatakan telah menerima arsip sebanyak
+<b>{{ $beritaAcara->pengirimanBerkas->count() }}</b> berkas tersebut dengan rincian sebagai berikut:
 </p>
-
 
 <!-- ================= TABEL ARSIP ================= -->
 
 <div class="section">
 
-<table>
+<table class="table-arsip">
 
 <thead>
 
@@ -252,11 +286,12 @@ Pihak Pertama dengan rincian sebagai berikut:
 </div>
 
 
+<!-- ================= PENUTUP ================= -->
+
 <p class="section">
-Demikian Berita Acara Serah Terima Arsip ini dibuat dengan
-sebenar-benarnya dan disepakati oleh kedua belah pihak.
-Sejak penandatanganan berita acara ini, maka arsip tersebut
-menjadi tanggung jawab Pihak Kedua.
+Demikian Berita Acara Serah Terima Arsip ini dibuat dengan sebenar-benarnya
+untuk dipergunakan sebagaimana mestinya. Sejak ditandatanganinya berita acara
+ini, maka arsip tersebut menjadi tanggung jawab Pihak Kedua.
 </p>
 
 
@@ -271,20 +306,21 @@ menjadi tanggung jawab Pihak Kedua.
 Yang Menyerahkan<br>
 Pihak Pertama
 
-<br><br><br><br>
+<div class="ttd-nama">
 
-<b>{{ $beritaAcara->pengirim->name }}</b>
+</div>
 
 </td>
+
 
 <td class="center">
 
 Yang Menerima<br>
 Pihak Kedua
 
-<br><br><br><br>
+<div class="ttd-nama">
 
-<b>{{ auth()->user()->name }}</b>
+</div>
 
 </td>
 

@@ -143,21 +143,34 @@
                     <table class="table table-bordered table-hover">
                         <thead class="bg-light text-center">
                             <tr>
-                                <th>Nama Loker</th>
+                                <th>Loker</th>
                                 <th>Kapasitas</th>
+                                <th>Sisa</th>
                                 <th>Status</th>
                                 <th width="22%">Aksi</th>
                             </tr>
                         </thead>
 
                         <tbody class="text-center">
-                            @foreach ($lemari->lokers as $loker)
+                           @foreach ($lemari->lokers as $loker)
+
+                            @php
+                                $arsipDiLoker = $loker->arsips->count();
+                                $sisaLoker = $loker->kapasitas - $arsipDiLoker;
+                            @endphp
+
                                 <tr>
                                     <td class="font-weight-bold">
                                         {{ $loker->kode_loker }}
                                     </td>
 
                                     <td>{{ $loker->kapasitas }}</td>
+
+                                   <td>
+                                        <span class="badge badge-success px-3">
+                                            {{ $sisaLoker }}
+                                        </span>
+                                    </td>
 
                                     <td>
                                         <span class="badge badge-pill

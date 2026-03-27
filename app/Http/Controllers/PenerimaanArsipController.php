@@ -105,7 +105,7 @@ class PenerimaanArsipController extends Controller
             // 🔹 Generate nomor arsip otomatis
             $nomorUrut = $loker->jumlahArsip() + 1;
             $nomorFormatted = str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
-            $nomorArsip = "{$loker->kode_loker}.{$nomorFormatted}";
+            $nomorArsip = "{$loker->lemari->kode_lemari}.{$loker->kode_loker}.{$nomorFormatted}";
 
             // 🔹 Simpan arsip (sekarang pakai data snapshot)
             $arsip = Arsip::create([
@@ -157,23 +157,55 @@ class PenerimaanArsipController extends Controller
         ]);
     }
 
+public function preview($id)
+{
+    $pengiriman = PengirimanBerkas::findOrFail($id);
+
+    $loker = Loker::with('lemari','arsips')
+        ->where('status','aktif')
+        ->get()
+        ->first(function ($l) {
+            return $l->arsips()->count() < $l->kapasitas;
+        });
+
+    if(!$loker){
+        return response()->json([
+            'message'=>'Tidak ada loker tersedia'
+        ],500);
+    }
+
+    $jumlah = $loker->arsips()->count();
+
+    $slot = floor($jumlah / 10) + 1;
+
+    return response()->json([
+        'success'=>true,
+        'data'=>[
+            'kode_permohonan' => $pengiriman->kode_permohonan,
+            'lemari' => $loker->lemari->kode_lemari,
+            'loker'  => $loker->kode_loker,
+            'slot'   => $slot
+        ]
+    ]);
+}
     /**
      * Tolak arsip
      */
     public function tolak(Request $request, $id)
-    {
-        $pengiriman = PengirimanBerkas::findOrFail($id);
+{
+    $pengiriman = PengirimanBerkas::findOrFail($id);
 
-        if ($pengiriman->status !== 'menunggu') {
-            return back()->with('error', 'Data sudah diproses.');
-        }
-
-        $pengiriman->update([
-            'status' => 'ditolak'
-        ]);
-
-        return back()->with('success', 'Pengiriman ditolak.');
+    if ($pengiriman->status !== 'menunggu') {
+        return back()->with('error', 'Data sudah diproses.');
     }
+
+    $pengiriman->update([
+        'status' => 'ditolak',
+        'berita_acara_id' => null //  reset supaya bisa masuk berita acara lagi
+    ]);
+
+    return back()->with('success', 'Pengiriman ditolak.');
+}
 
     /**
      * Ambil loker berdasarkan lemari (AJAX)

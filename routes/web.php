@@ -98,11 +98,17 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/', [PenerimaanArsipController::class, 'index'])->name('index');
 
-            Route::post('/{id}/terima', [PenerimaanArsipController::class, 'terima'])->name('terima');
+            Route::get('/{id}/preview',
+    [PenerimaanArsipController::class,'preview']);
 
-            Route::post('/{id}/tolak', [PenerimaanArsipController::class, 'tolak'])->name('tolak');
+Route::post('/{id}/terima',
+    [PenerimaanArsipController::class,'terima']);
 
-            Route::get('/{id}/detail', [PenerimaanArsipController::class, 'show'])->name('detail');
+Route::post('/{id}/tolak',
+    [PenerimaanArsipController::class,'tolak'])->name('tolak');
+
+Route::get('/{id}/detail',
+    [PenerimaanArsipController::class,'show'])->name('detail');
 
             Route::get('/lemari/{lemari}/lokers', [PenerimaanArsipController::class, 'getLokersByLemari'])
                 ->name('lokers');

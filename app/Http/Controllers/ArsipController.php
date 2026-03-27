@@ -15,7 +15,8 @@ class ArsipController extends Controller
     'lemari:id,kode_lemari,nama_lemari',
     'loker:id,lemari_id,kode_loker,kolom,baris'
 ])
-->orderBy('tanggal_masuk', 'desc');
+->orderByDesc('tanggal_masuk')
+->orderByDesc('id');
 
     /* =====================
      | SEARCH (UTAMA)
@@ -55,40 +56,53 @@ class ArsipController extends Controller
     return view('admin.arsip-show', compact('arsip'));
 }
 
+
 public function update(Request $request, Arsip $arsip)
 {
+    $user = Auth::user();
+
+    // Jika arsip sudah musnah dan bukan admin → tidak boleh diubah
+    if ($arsip->status === 'musnah' && $user->role !== 'admin') {
+        return back()->with('error', 'Arsip yang sudah dimusnahkan tidak dapat diubah oleh petugas.');
+    }
+
     if ($request->status == 'dipinjam') {
+
         $request->validate([
-            'dipinjam_oleh'   => 'required',
-            'keperluan'       => 'required',
+            'dipinjam_oleh'  => 'required',
+            'keperluan'      => 'required',
             'tanggal_pinjam' => 'required|date',
         ]);
 
         $arsip->update([
-            'status'          => 'dipinjam',
+            'status'         => 'dipinjam',
             'dipinjam_oleh'  => $request->dipinjam_oleh,
             'keperluan'      => $request->keperluan,
-            'tanggal_pinjam'=> $request->tanggal_pinjam,
+            'tanggal_pinjam' => $request->tanggal_pinjam,
         ]);
     }
 
     elseif ($request->status == 'musnah') {
+
         $request->validate([
             'dimusnahkan_oleh' => 'required',
-            'tanggal_musnah'  => 'required|date',
+            'tanggal_musnah'   => 'required|date',
         ]);
 
         $arsip->update([
-            'status'            => 'musnah',
+            'status'           => 'musnah',
             'dimusnahkan_oleh' => $request->dimusnahkan_oleh,
             'tanggal_musnah'   => $request->tanggal_musnah,
         ]);
     }
 
     else {
-        $arsip->update(['status' => 'tersimpan']);
+        $arsip->update([
+            'status' => 'tersimpan'
+        ]);
     }
 
     return back()->with('success', 'Status arsip berhasil diperbarui');
 }
+
 }

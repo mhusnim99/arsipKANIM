@@ -101,6 +101,62 @@
     </div>
 </div>
 
+{{-- MODAL PREVIEW --}}
+<div class="modal fade" id="modalPreview" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-info shadow">
+
+            <div class="modal-header bg-info text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-archive mr-2"></i> Preview Lokasi Arsip
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label class="font-weight-bold">Kode Permohonan</label>
+                    <div id="previewKode" class="border rounded p-2 bg-light"></div>
+                </div>
+
+                <hr>
+
+                <div class="row text-center">
+
+                    <div class="col-4">
+                        <label class="font-weight-bold">Lemari</label>
+                        <div id="previewLemari" class="border rounded p-2 bg-light"></div>
+                    </div>
+
+                    <div class="col-4">
+                        <label class="font-weight-bold">Loker</label>
+                        <div id="previewLoker" class="border rounded p-2 bg-light"></div>
+                    </div>
+
+                    <div class="col-4">
+                        <label class="font-weight-bold">Slot</label>
+                        <div id="previewSlot" class="border rounded p-2 bg-light"></div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary px-4" data-dismiss="modal">
+                    Batal
+                </button>
+
+                <button class="btn btn-info px-4" id="btnSimpanBerkas">
+                    Simpan Berkas
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
 {{-- MODAL TOLAK --}}
 <div class="modal fade" id="modalTolak" tabindex="-1">
     <div class="modal-dialog modal-md modal-dialog-centered">
@@ -131,82 +187,143 @@
     </div>
 </div>
 
+
 {{-- MODAL DETAIL --}}
-<div class="modal fade" id="modalDetail">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header bg-info text-white">
-                        <h5>Detail Pengiriman</h5>
-                        <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    </div>
-                    <div class="modal-body" id="detailContent">Loading...</div>
-                </div>
+<div class="modal fade" id="modalDetail" tabindex="-1">
+    <div class="modal-dialog modal-md modal-dialog-centered">
+        <div class="modal-content border-primary shadow">
+
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-info-circle mr-2"></i> Detail Pengiriman
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
             </div>
+
+            <div class="modal-body">
+
+                <div class="mb-3">
+                    <label class="font-weight-bold">Kode Permohonan</label>
+                    <div id="detailKode" class="border rounded p-2 bg-light"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="font-weight-bold">Asal Berkas</label>
+                    <div id="detailAsal" class="border rounded p-2 bg-light"></div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="font-weight-bold">Status</label>
+                    <div id="detailStatus" class="border rounded p-2 bg-light"></div>
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary px-4" data-dismiss="modal">
+                    Tutup
+                </button>
+            </div>
+
+        </div>
+    </div>
 </div>
+
 @endsection
 
 @section('scripts')
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-$(function() {
+let selectedId = null;
 
-    $('.btn-terima').click(function(){
-        let id = $(this).data('id');
+$(document).on('click','.btn-terima',function(){
 
-        $.post(`/admin/penerimaan-arsip/${id}/terima`,
-    {_token:'{{ csrf_token() }}'}).done(function(res){
-    Swal.fire({
-        icon:'success',
-        title:'Berhasil',
-        text:'Berkas berhasil diterima',
-        timer:1500,
-        showConfirmButton:false
-    });
-    setTimeout(()=>location.reload(),1200);}).fail(function(xhr){
-    Swal.fire({
-        icon:'error',
-        title:'Terjadi Kesalahan',
-        text: xhr.responseJSON?.message ?? 'Server Error'});});
-    });
+    selectedId = $(this).data('id');
 
-     $(document).on('click', '.btn-detail', function() {
-            const id = $(this).data('id');
-            $('#modalDetail').modal('show');
-            $('#detailContent').html('Loading...');
-            $.get(`/admin/penerimaan-arsip/${id}/detail`, res => {
-                $('#detailContent').html(`
-            <table class="table table-bordered">
-                <tr><th>Kode</th><td>${res.data.kode_permohonan}</td></tr>
-                <tr><th>Asal</th><td>${res.data.asal_berkas}</td></tr>
-                <tr><th>Status</th><td>${res.data.status}</td></tr>
-            </table>
-        `);
-            });
+    $.get("{{ url('admin/penerimaan-arsip') }}/" + selectedId + "/preview")
+    .done(function(res){
+
+        let data = res.data;
+
+        $('#previewKode').text(data.kode_permohonan);
+        $('#previewLemari').text(data.lemari);
+        $('#previewLoker').text(data.loker);
+        $('#previewSlot').text(data.slot);
+
+        $('#modalPreview').modal('show');
+
+    })
+    .fail(function(err){
+        console.log(err);
+        Swal.fire('Error','Preview gagal diambil','error');
     });
 
-    $('.btn-tolak').click(function(){
-        $('#formTolak').data('id', $(this).data('id'));
-        $('#modalTolak').modal('show');
-    });
+});
 
-    $('#formTolak').submit(function(e){
-        e.preventDefault();
-        let id = $(this).data('id');
+$(document).on('click','#btnSimpanBerkas',function(){
 
-        $.post(`/admin/penerimaan-arsip/${id}/tolak`, $(this).serialize(), function(){
-            $('#modalTolak').modal('hide');
-            Swal.fire({
-                icon:'success',
-                title:'Ditolak',
-                text:'Berkas berhasil ditolak',
-                timer:1500,
-                showConfirmButton:false
-            });
-            setTimeout(()=>location.reload(),1200);
+    $.post("{{ url('admin/penerimaan-arsip') }}/" + selectedId + "/terima",{
+        _token:'{{ csrf_token() }}'
+    })
+    .done(function(){
+
+        $('#modalPreview').modal('hide');
+
+        Swal.fire({
+            icon:'success',
+            title:'Berhasil',
+            text:'Berkas berhasil disimpan',
+            timer:1500,
+            showConfirmButton:false
         });
+
+        setTimeout(()=>{ location.reload(); },1200);
+
+    })
+    .fail(function(err){
+        console.log(err);
+        Swal.fire('Error','Gagal menyimpan arsip','error');
     });
 
 });
 </script>
+
+<script>
+   $('.btn-detail').click(function(){
+
+    let id = $(this).data('id');
+
+    $.get(`/admin/penerimaan-arsip/${id}/detail`)
+    .done(function(res){
+
+        let data = res.data;
+
+        $('#detailKode').text(data.kode_permohonan);
+        $('#detailAsal').text(data.asal_berkas);
+        $('#detailStatus').text(data.status);
+
+        $('#modalDetail').modal('show');
+
+    });
+
+});
+</script>
+
+<script>
+    $('.btn-tolak').click(function(){
+
+    let id = $(this).data('id');
+
+    $('#formTolak').attr(
+        'action',
+        `/admin/penerimaan-arsip/${id}/tolak`
+    );
+
+    $('#modalTolak').modal('show');
+
+});
+</script>
+
 @endsection

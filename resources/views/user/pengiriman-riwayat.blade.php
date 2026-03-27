@@ -156,12 +156,14 @@
                                         <td class="text-center">{{ $loop->iteration }}</td>
                                         <td>
                                             <strong class="text-primary">{{ $item->kode_permohonan }}</strong><br>
-                                            <small class="text-muted">ID: {{ $item->id }}</small>
+                                            {{-- <small class="text-muted">ID: {{ $item->id }}</small> --}}
                                         </td>
                                         <td>
-                                            {{ $item->tanggal_kirim->format('d/m/Y') }}<br>
-                                            <small class="text-muted">{{ $item->created_at->format('H:i') }}</small>
-                                        </td>
+    {{ \Carbon\Carbon::parse($item->tanggal_kirim)->format('d/m/Y') }}<br>
+    <small class="text-muted">
+        {{ $item->created_at->format('H.i') }} WIB
+    </small>
+</td>
                                         <td>
                                             <i class="fas fa-map-marker-alt text-secondary mr-1"></i>
                                             {{ $item->asal_berkas }}
