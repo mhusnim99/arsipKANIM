@@ -9,6 +9,7 @@ use App\Http\Controllers\LokerController;
 use App\Http\Controllers\ManajemenLokasiController;
 use App\Http\Controllers\PenerimaanArsipController;
 use App\Http\Controllers\PengirimanBerkasController;
+use App\Http\Controllers\MusnahBerkasController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Auth;
 
@@ -133,7 +134,13 @@ Route::get('/{id}/detail',
             Route::post('/{arsip}/pinjam', [PenerimaanArsipController::class, 'pinjam'])->name('pinjam');
 
             Route::post('/{arsip}/musnah', [PenerimaanArsipController::class, 'musnah'])->name('musnah');
+
+
         });
+
+         Route::get('/musnah', [MusnahBerkasController::class, 'index'])->name('musnah.index');
+        Route::delete('/musnah/bulk-delete', [MusnahBerkasController::class, 'bulkDelete'])->name('musnah.bulkDelete');
+
     });
 
         /*

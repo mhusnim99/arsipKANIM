@@ -104,6 +104,13 @@
             </a>
         </li>
 
+      <li class="nav-item {{ request()->routeIs('admin.musnah.index') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('admin.musnah.index') }}">
+        <i class="fas fa-fw fa-trash"></i>
+        <span>Musnah Berkas</span>
+    </a>
+</li>
+
         <hr class="sidebar-divider d-none d-md-block">
 
         <div class="text-center d-none d-md-inline">
