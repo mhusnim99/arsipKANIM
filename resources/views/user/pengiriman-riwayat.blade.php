@@ -145,7 +145,6 @@
                                     <th width="12%">Tanggal Kirim</th>
                                     <th width="20%">Asal Berkas</th>
                                     <th width="12%">Status</th>
-                                    <th width="20%">Catatan</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -159,11 +158,10 @@
                                             {{-- <small class="text-muted">ID: {{ $item->id }}</small> --}}
                                         </td>
                                         <td>
-    {{ \Carbon\Carbon::parse($item->tanggal_kirim)->format('d/m/Y') }}<br>
-    <small class="text-muted">
-        {{ $item->created_at->format('H.i') }} WIB
-    </small>
-</td>
+                                            <span class="badge badge-info px-3">
+                                                {{ $item->tanggal_kirim->format('d/m/Y') }}
+                                            </span>
+                                        </td>
                                         <td>
                                             <i class="fas fa-map-marker-alt text-secondary mr-1"></i>
                                             {{ $item->asal_berkas }}
@@ -181,15 +179,6 @@
                                                 <span class="badge badge-danger p-2">
                                                     <i class="fas fa-times mr-1"></i>Ditolak
                                                 </span>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            @if ($item->catatan)
-                                                <span class="d-inline-block text-truncate" style="max-width: 250px;">
-                                                    {{ $item->catatan }}
-                                                </span>
-                                            @else
-                                                <span class="text-muted">-</span>
                                             @endif
                                         </td>
                                     </tr>

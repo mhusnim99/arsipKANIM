@@ -174,11 +174,6 @@ Website: surabaya.imigrasi.go.id
 BERITA ACARA SERAH TERIMA ARSIP
 </div>
 
-<div class="nomor">
-Nomor : {{ $beritaAcara->nomor ?? '-' }}
-</div>
-
-
 <!-- ================= PARAGRAF PEMBUKA ================= -->
 
 <p>
@@ -186,105 +181,18 @@ Kami yang bertanda tangan di bawah ini, pada hari
 <b>{{ \Carbon\Carbon::parse($beritaAcara->tanggal_dibuat)->locale('id')->translatedFormat('l') }}</b>,
 tanggal
 <b>{{ \Carbon\Carbon::parse($beritaAcara->tanggal_dibuat)->locale('id')->translatedFormat('d F Y') }}</b>,
-telah melaksanakan serah terima arsip dengan keterangan sebagai berikut:
+telah melaksanakan serah terima arsip pada <b>{{ Auth::user()->kantor }}</b> oleh <b>Bidang TKIM</b> dengan keterangan sebagai berikut:
 </p>
-
-<!-- ================= PIHAK PERTAMA ================= -->
-
-<div class="section">
-
-<table class="no-border">
-
-<tr>
-<td width="130">Nama</td>
-<td>: </td>
-</tr>
-
-<tr>
-<td>Jabatan</td>
-<td>: </td>
-</tr>
-
-</table>
-
-</div>
-
-<p>Selanjutnya disebut sebagai <b>Pihak Pertama</b>.</p>
-
-
-<!-- ================= PIHAK KEDUA ================= -->
-
-<div class="section">
-
-<table class="no-border">
-
-<tr>
-<td width="130">Nama</td>
-<td>: </td>
-</tr>
-
-<tr>
-<td>Jabatan</td>
-<td>:</td>
-</tr>
-
-</table>
-
-</div>
-
-<p>Selanjutnya disebut sebagai <b>Pihak Kedua</b>.</p>
-
 
 <p>
-Pihak Pertama telah menyerahkan arsip kepada Pihak Kedua sebanyak
-<b>{{ $beritaAcara->pengirimanBerkas->count() }}</b> berkas, dan Pihak Kedua
-menyatakan telah menerima arsip sebanyak
-<b>{{ $beritaAcara->pengirimanBerkas->count() }}</b> berkas tersebut dengan rincian sebagai berikut:
+Berkas bulan Juli 2025 : 289
 </p>
-
-<!-- ================= TABEL ARSIP ================= -->
-
-<div class="section">
-
-<table class="table-arsip">
-
-<thead>
-
-<tr>
-<th width="40">No</th>
-<th>Kode Permohonan</th>
-<th width="120">Tanggal Kirim</th>
-<th>Asal Berkas</th>
-</tr>
-
-</thead>
-
-<tbody>
-
-@foreach($beritaAcara->pengirimanBerkas as $item)
-
-<tr>
-
-<td class="center">{{ $loop->iteration }}</td>
-
-<td>{{ $item->kode_permohonan }}</td>
-
-<td class="center">
-{{ \Carbon\Carbon::parse($item->tanggal_kirim)->format('d/m/Y') }}
-</td>
-
-<td>{{ $item->asal_berkas }}</td>
-
-</tr>
-
-@endforeach
-
-</tbody>
-
-</table>
-
-</div>
-
+Berkas bulan Agustus 2025: 583
+Berkas bulan September 2025: 1.335
+Berkas bulan Oktober 2025: 518
+Berkas bulan November 2025: 1.044
+Total: 3.769 
+</p>
 
 <!-- ================= PENUTUP ================= -->
 
@@ -303,8 +211,8 @@ ini, maka arsip tersebut menjadi tanggung jawab Pihak Kedua.
 
 <td class="center">
 
-Yang Menyerahkan<br>
-Pihak Pertama
+Diserahkan oleh<br>
+
 
 <div class="ttd-nama">
 
@@ -315,8 +223,8 @@ Pihak Pertama
 
 <td class="center">
 
-Yang Menerima<br>
-Pihak Kedua
+Diterima oleh<br>
+
 
 <div class="ttd-nama">
 

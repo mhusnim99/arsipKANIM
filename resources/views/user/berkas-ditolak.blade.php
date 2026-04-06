@@ -47,7 +47,6 @@
                             <th width="120">Tanggal</th>
                             <th>Asal</th>
                             <th>Alasan</th>
-                            <th width="150">Ditolak Pada</th>
                             <th width="180">Aksi</th>
                         </tr>
                     </thead>
@@ -74,13 +73,6 @@
                                     {{ $item->alasan_penolakan }}
                                 </span>
                             </td>
-
-                            <td class="text-center">
-                                <span class="badge badge-secondary px-3">
-                                    {{ $item->ditolak_pada ? $item->ditolak_pada->format('d/m/Y H:i') : '-' }}
-                                </span>
-                            </td>
-
                             <td class="text-center">
                                 <form action="{{ route('user.pengiriman.kirim-perbaikan', $item->id) }}"
                                       method="POST"

@@ -199,7 +199,7 @@
 
                 <tr>
                     <th class="bg-light">Tanggal & Waktu</th>
-                    <td>{{ optional($arsip->tanggal_musnah)->format('d/m/Y H:i') }}</td>
+                    <td>{{ $arsip->tanggal_musnah? \Carbon\Carbon::parse($arsip->tanggal_musnah)->format('d/m/Y H:i'): '-' }}</td>
                 </tr>
 
             </table>

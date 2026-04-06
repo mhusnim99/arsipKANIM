@@ -24,7 +24,7 @@ class AuthenticatedSessionController extends Controller
 
         if (!Auth::attempt($credentials)) {
             return back()->withErrors([
-                'email' => 'The provided credentials do not match our records.',
+                'email' => 'Email yang dimasukkan tidak terdaftar atau password salah.',
             ])->onlyInput('email');
         }
 

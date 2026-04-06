@@ -24,7 +24,7 @@ class KantorUserSeeder extends Seeder
                 'kantor' => 'TKIM',
             ],
             [
-                'name'   => 'Petugas Kantor Imigrasi Kelas I TPI Surabaya',
+                'name'   => 'Petugas Kantor Imigrasi Kelas I Khusus TPI Surabaya',
                 'last_name' => 'Kanim',
                 'email'  => 'kanim@arsip.com',
                 'password' => Hash::make('kanim123'),
@@ -32,7 +32,7 @@ class KantorUserSeeder extends Seeder
                 'email_verified_at' => now(),
                 'created_at' => now(),
                 'updated_at' => now(),
-                'kantor' => 'Kantor Imigrasi Kelas I TPI Surabaya',
+                'kantor' => 'Kantor Imigrasi Kelas I Khusus TPI Surabaya',
             ],
             [
                 'name'   => 'Petugas ULP LTSA MPP Sidoarjo',
