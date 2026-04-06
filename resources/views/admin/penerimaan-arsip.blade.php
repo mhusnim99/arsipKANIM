@@ -283,9 +283,11 @@ $(document).on('click','#btnSimpanBerkas',function(){
 
     })
     .fail(function(err){
-        console.log(err);
-        Swal.fire('Error','Gagal menyimpan arsip','error');
-    });
+    console.log(err);
+    console.log(err.responseText);
+
+    Swal.fire('Error', err.responseText, 'error');
+});
 
 });
 </script>
