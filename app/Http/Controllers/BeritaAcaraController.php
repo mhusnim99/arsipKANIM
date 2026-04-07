@@ -47,10 +47,7 @@ class BeritaAcaraController extends Controller
 
         try {
 
-            $nomor = 'BA/' . date('Y') . '/' . str_pad(BeritaAcara::count() + 1, 4, '0', STR_PAD_LEFT);
-
             $beritaAcara = BeritaAcara::create([
-                'nomor_berita_acara' => $nomor,
                 'petugas_pengirim_id' => $user->id,
                 'tanggal_dibuat' => now(),
                 'jumlah_arsip' => $pengiriman->count(),
@@ -74,7 +71,7 @@ class BeritaAcaraController extends Controller
             'pengiriman' => $pengiriman
         ]);
 
-        $fileName = 'berita-acara-' . str_replace('/', '-', $nomor) . '.pdf';
+        $fileName = 'berita-acara-' . $beritaAcara->id . '.pdf';
 
         return $pdf->stream($fileName);
     }
@@ -106,7 +103,7 @@ class BeritaAcaraController extends Controller
             'beritaAcara' => $beritaAcara
         ]);
 
-        $fileName = 'berita-acara-' . $beritaAcara->nomor_berita_acara . '.pdf';
+        $fileName = 'berita-acara-' . $beritaAcara->id . '.pdf';
 
         $path = 'berita-acara/' . $fileName;
 

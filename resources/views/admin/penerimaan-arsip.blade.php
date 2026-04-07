@@ -14,70 +14,105 @@
     </div>
 
     <!-- CARD TABLE -->
+    <form method="GET" class="mb-3">
+        <div class="d-flex gap-2">
+
+            <select name="petugas" class="form-control">
+                <option value="">-- Pilih Petugas --</option>
+                @foreach($petugasList as $p)
+                    <option value="{{ $p->id }}" {{ request('petugas') == $p->id ? 'selected' : '' }}>
+                        {{ $p->name }}
+                    </option>
+                @endforeach
+            </select>
+
+            <button class="btn btn-primary">Filter</button>
+
+            <a href="{{ route('admin.penerimaan-arsip.index') }}" class="btn btn-secondary">
+                Reset
+            </a>
+
+        </div>
+    </form>
     <div class="card shadow border-0 mb-4">
         <div class="card-header text-white font-weight-bold" style="background:linear-gradient(135deg,#38BDF8,#0EA5E9)">
             <i class="fas fa-paper-plane mr-1"></i> Daftar Pengiriman Berkas
         </div>
 
         <div class="card-body table-responsive">
-            <table class="table table-hover table-bordered align-middle">
-                <thead class="thead-light text-center">
-                    <tr>
-                        <th width="50">No</th>
-                        <th class="text-left">Kode Permohonan</th>
-                        <th width="120">Tanggal</th>
-                        <th class="text-left">Asal</th>
-                        <th width="140">Petugas</th>
-                        <th width="230">Aksi</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($pengirimanBerkas as $item)
-                    <tr>
-                        <td class="text-center">{{ $loop->iteration }}</td>
-                        <td class="thead-light">{{ $item->kode_permohonan }}</td>
-                        <td class="text-center">
-                            <span class="badge badge-info px-3">
-                                {{ $item->tanggal_kirim->format('d/m/Y') }}
-                            </span>
-                        </td>
-                        <td>{{ $item->asal_berkas }}</td>
-                        <td class="text-center">
-                            <span class="badge badge-secondary px-3">
-                                {{ optional($item->petugasPengirim)->name ?? '-' }}
-                            </span>
-                        </td>
-                        <td class="text-center">
-                            <div class="btn-group">
-                                <button class="btn btn-success btn-sm btn-terima px-3 shadow-sm"
-                                        data-id="{{ $item->id }}">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="btn btn-danger btn-sm btn-tolak px-3 shadow-sm"
-                                        data-id="{{ $item->id }}">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                                <button class="btn btn-info btn-sm btn-detail px-3 shadow-sm"
-                                        data-id="{{ $item->id }}">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                        </td>
-                    </tr>
-                    @empty
-                    <tr>
-                        <td colspan="6" class="text-center text-muted py-4">
-                            <i class="fas fa-inbox fa-2x mb-2"></i>
-                            <br>Tidak ada data pengiriman
-                        </td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
+            <form method="POST" action="{{ route('admin.penerimaan-arsip.bulk') }}" class="form-bulk">
+                @csrf
+                <button class="btn btn-success mb-3">
+                    ✔ Terima yang dipilih
+                </button>
+                <table class="table table-hover table-bordered align-middle">
+                    <thead class="thead-light text-center">
+                        <tr>
+                            <th width="40">
+                                <input type="checkbox" id="checkAll">
+                            </th>
+                            <th width="50">No</th>
+                            <th class="text-left">Kode Permohonan</th>
+                            <th width="120">Tanggal</th>
+                            <th class="text-left">Asal</th>
+                            <th width="140">Petugas</th>
+                            <th width="230">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($pengirimanBerkas as $item)
+                        <tr>
+                            <td class="text-center">
+                                <input type="checkbox" name="ids[]" value="{{ $item->id }}">
+                            </td>
 
-            <div class="mt-3">
-                {{ $pengirimanBerkas->links() }}
-            </div>
+                            <td class="text-center">
+                                {{ $pengirimanBerkas->firstItem() + $loop->index }}
+                            </td>
+                            <td class="thead-light">{{ $item->kode_permohonan }}</td>
+                            <td class="text-center">
+                                <span class="badge badge-info px-3">
+                                    {{ $item->tanggal_kirim->format('d/m/Y') }}
+                                </span>
+                            </td>
+                            <td>{{ $item->asal_berkas }}</td>
+                            <td class="text-center">
+                                <span class="badge badge-secondary px-3">
+                                    {{ optional($item->petugasPengirim)->name ?? '-' }}
+                                </span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <button class="btn btn-success btn-sm btn-terima px-3 shadow-sm"
+                                            data-id="{{ $item->id }}">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-danger btn-sm btn-tolak px-3 shadow-sm"
+                                            data-id="{{ $item->id }}">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                    <button class="btn btn-info btn-sm btn-detail px-3 shadow-sm"
+                                            data-id="{{ $item->id }}">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-2x mb-2"></i>
+                                <br>Tidak ada data pengiriman
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+
+                <div class="mt-3">
+                    {{ $pengirimanBerkas->links() }}
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -322,6 +357,38 @@ $(document).on('click','#btnSimpanBerkas',function(){
     );
 
     $('#modalTolak').modal('show');
+
+});
+</script>
+<script>
+    document.getElementById('checkAll').addEventListener('click', function() {
+        let checkboxes = document.querySelectorAll('input[name="ids[]"]');
+        checkboxes.forEach(cb => cb.checked = this.checked);
+    });
+</script>
+<script>
+$('.form-bulk').submit(function(e){
+
+    let checked = $('input[name="ids[]"]:checked').length;
+
+    if(checked === 0){
+        e.preventDefault();
+        Swal.fire('Pilih minimal 1 data');
+        return;
+    }
+
+    e.preventDefault();
+
+    Swal.fire({
+        title: 'Yakin?',
+        text: 'Terima semua berkas terpilih?',
+        icon: 'warning',
+        showCancelButton: true
+    }).then((result)=>{
+        if(result.isConfirmed){
+            e.currentTarget.submit();
+        }
+    });
 
 });
 </script>

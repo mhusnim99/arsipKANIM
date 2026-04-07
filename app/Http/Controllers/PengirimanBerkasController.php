@@ -66,17 +66,42 @@ class PengirimanBerkasController extends Controller
     /**
      * Riwayat pengiriman per petugas
      */
-    public function riwayat()
+    public function riwayat(Request $request)
     {
         abort_unless(Auth::user()->role === 'user', 403);
 
-        $riwayat = PengirimanBerkas::where('petugas_pengirim_id', Auth::id())
-            ->orderByDesc('created_at')
-            ->paginate(10);
+        // Base query (WAJIB: scope ke user)
+        $query = PengirimanBerkas::where('petugas_pengirim_id', Auth::id());
 
-        return view('user.pengiriman-riwayat', compact('riwayat'));
+        // FILTER BULAN
+        if ($request->filled('bulan')) {
+            $query->whereMonth('tanggal_kirim', $request->bulan);
+        }
+
+        // FILTER TAHUN
+        if ($request->filled('tahun')) {
+            $query->whereYear('tanggal_kirim', $request->tahun);
+        }
+
+        // DATA UTAMA (dengan pagination + jaga query string)
+        $riwayat = $query->orderByDesc('created_at')
+            ->paginate(10)
+            ->withQueryString();
+
+        // STATISTIK (menggunakan clone agar query tidak rusak)
+        $total = (clone $query)->count();
+        $diterima = (clone $query)->where('status', 'diterima')->count();
+        $menunggu = (clone $query)->where('status', 'menunggu')->count();
+        $ditolak = (clone $query)->where('status', 'ditolak')->count();
+
+        return view('user.pengiriman-riwayat', compact(
+            'riwayat',
+            'total',
+            'diterima',
+            'menunggu',
+            'ditolak'
+        ));
     }
-
     /**
      * Cek status pengiriman (AJAX)
      */
@@ -106,17 +131,90 @@ class PengirimanBerkasController extends Controller
             'kode_permohonan' => 'required|string'
         ]);
 
-        $result = $simkim->getPermohonanByKode($request->kode_permohonan);
+        // 🔹 Pecah input (bisa enter, koma, spasi)
+        $kodeList = preg_split('/[\s,]+/', trim($request->kode_permohonan));
 
-        if (!($result['success'] ?? false)) {
-            return back()->with('error', 'Data tidak ditemukan di SIMKIM');
+        $results = [];
+        $errors = [];
+        $duplicates = [];
+
+        foreach ($kodeList as $kode) {
+
+            if (empty($kode)) continue;
+
+            // 🔹 Cek duplikasi (sudah pernah dikirim)
+            $exists = PengirimanBerkas::where('kode_permohonan', $kode)
+                ->whereIn('status', ['menunggu', 'diterima'])
+                ->exists();
+
+            if ($exists) {
+                $duplicates[] = $kode;
+                continue;
+            }
+
+            try {
+                $result = $simkim->getPermohonanByKode($kode);
+
+                // 🔹 Validasi response API
+                if (($result['success'] ?? false) &&
+                    ($result['data']['permohonan']['alurterakhir'] ?? '') === 'SELESAI'
+                ) {
+
+                    $results[] = $result['data'];
+                } else {
+                    $errors[] = $kode;
+                }
+            } catch (\Exception $e) {
+                $errors[] = $kode;
+            }
+
+            // 🔹 Anti spam API (delay 0.2 detik)
+            usleep(200000);
+        }
+
+        // 🔹 Feedback ke user
+        if (count($results) === 0) {
+            return back()->with('error', 'Tidak ada data valid ditemukan.');
         }
 
         return back()->with([
-            'simkim' => $result['data']
+            'simkim_multiple' => $results,
+            'simkim_error' => $errors,
+            'simkim_duplicate' => $duplicates
         ]);
     }
+    public function storeMultiple(Request $request)
+    {
+        $request->validate([
+            'data' => 'required|array'
+        ]);
 
+        foreach ($request->data as $json) {
+
+            $snapshot = json_decode($json, true);
+            $permohonan = $snapshot['permohonan'];
+
+            // Cek duplikat lagi (safety layer)
+            if (PengirimanBerkas::where('kode_permohonan', $permohonan['nopermohonan'])
+                ->whereIn('status', ['menunggu', 'diterima'])
+                ->exists()
+            ) {
+                continue;
+            }
+
+            PengirimanBerkas::create([
+                'kode_permohonan'     => $permohonan['nopermohonan'],
+                'tanggal_kirim'       => now(),
+                'asal_berkas'         => Auth::user()->kantor,
+                'petugas_pengirim_id' => Auth::id(),
+                'status'              => 'menunggu',
+                'simkim_snapshot'     => $snapshot,
+            ]);
+        }
+
+        return redirect()->route('user.pengiriman')
+            ->with('success', 'Semua berkas berhasil dikirim.');
+    }
     public function berkasDitolak()
     {
         $pengirimanBerkas = PengirimanBerkas::where('petugas_pengirim_id', Auth::id())

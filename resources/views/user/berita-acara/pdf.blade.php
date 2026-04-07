@@ -86,7 +86,7 @@ td{
 
 .no-border td{
     border:none;
-    padding:2px 4px;
+    padding:0px 0px;
 }
 
 /* ================= ALIGN ================= */
@@ -114,11 +114,11 @@ td{
 /* ================= TTD ================= */
 
 .signature{
-    margin-top:60px;
+    margin-top:20px;
 }
 
 .ttd-nama{
-    margin-top:60px;
+    margin-top:20px;
     font-weight:bold;
 }
 
@@ -183,23 +183,81 @@ tanggal
 <b>{{ \Carbon\Carbon::parse($beritaAcara->tanggal_dibuat)->locale('id')->translatedFormat('d F Y') }}</b>,
 telah melaksanakan serah terima arsip pada <b>{{ Auth::user()->kantor }}</b> oleh <b>Bidang TKIM</b> dengan keterangan sebagai berikut:
 </p>
-
-<p>
-Berkas bulan Juli 2025 : 289
-</p>
-Berkas bulan Agustus 2025: 583
-Berkas bulan September 2025: 1.335
-Berkas bulan Oktober 2025: 518
-Berkas bulan November 2025: 1.044
-Total: 3.769 
-</p>
+<table style="width:100%">
+  <tr>
+    <td><b>Bulan</b></td>
+    <td><b>Tahun</b></td>
+    <td><b>Jumlah</b></td>
+  </tr>
+  <tr>
+    <td>Januari</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Februari</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Maret</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>April</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Mei</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Juni</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Juli</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Agustus</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>September</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Oktober</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>November</td>
+    <td></td>
+    <td></td>
+  </tr>
+  <tr>
+    <td>Desember</td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
 
 <!-- ================= PENUTUP ================= -->
-
-<p class="section">
+<p class="section"> </p>
+<b>Total jumlah arsip yang diserahkan : </b>
+<p>
 Demikian Berita Acara Serah Terima Arsip ini dibuat dengan sebenar-benarnya
 untuk dipergunakan sebagaimana mestinya. Sejak ditandatanganinya berita acara
-ini, maka arsip tersebut menjadi tanggung jawab Pihak Kedua.
+ini, maka arsip tersebut menjadi tanggung jawab oleh <b>Bidang TKIM.</b>
 </p>
 
 
@@ -219,7 +277,6 @@ Diserahkan oleh<br>
 </div>
 
 </td>
-
 
 <td class="center">
 

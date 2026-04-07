@@ -5,100 +5,63 @@
 
         <!-- Page Heading -->
         <div class="d-sm-flex align-items-center justify-content-between mb-4">
-            <h1 class="h3 mb-0 text-gray-800">
-                <i class="fas fa-history text-primary mr-2"></i>Riwayat Pengiriman Berkas
+            <h1 class="h3 font-weight-bold" style="color:#1E3A8A;">
+                Riwayat Pengiriman Berkas
             </h1>
-            <div>
-                <span class="badge px-4 py-2 shadow-sm" style="background:#1E3A8A; color:white;">
-                    <i class="fas fa-undo"></i> Riwayat Pengiriman
-                </span>
-            </div>
         </div>
 
-        <!-- Statistics Cards -->
+         <!-- Statistics Cards -->
         <div class="row mb-4">
+
+            <!-- TOTAL -->
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="card border-left-primary shadow h-100 py-2">
                     <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
-                                    Total Pengiriman
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ $riwayat->total() }}
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-paper-plane fa-2x text-gray-300"></i>
-                            </div>
+                        <div class="h4 font-weight-bold text-gray-800">
+                            {{ $total }}
                         </div>
+                        <div class="h5 font-weight-bold text-primary">Total Pengiriman</div>
                     </div>
                 </div>
             </div>
 
+            <!-- DITERIMA -->
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="card border-left-success shadow h-100 py-2">
                     <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
-                                    Diterima
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ \App\Models\PengirimanBerkas::where('petugas_pengirim_id', Auth::id())->where('status', 'diterima')->count() }}
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-check-circle fa-2x text-gray-300"></i>
-                            </div>
+                        <div class="h4 font-weight-bold text-gray-800">
+                            {{ $diterima }}
                         </div>
+                        <div class="h5 font-weight-bold text-success">Diterima</div>
                     </div>
                 </div>
             </div>
 
+            <!-- MENUNGGU -->
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="card border-left-warning shadow h-100 py-2">
                     <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
-                                    Menunggu
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ \App\Models\PengirimanBerkas::where('petugas_pengirim_id', Auth::id())->where('status', 'menunggu')->count() }}
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-clock fa-2x text-gray-300"></i>
-                            </div>
+                        <div class="h4 font-weight-bold text-gray-800">
+                            {{ $menunggu }}
                         </div>
+                        <div class="h5 font-weight-bold text-warning">Menunggu</div>
                     </div>
                 </div>
             </div>
 
+            <!-- DITOLAK -->
             <div class="col-xl-3 col-md-6 mb-4">
                 <div class="card border-left-danger shadow h-100 py-2">
                     <div class="card-body">
-                        <div class="row no-gutters align-items-center">
-                            <div class="col mr-2">
-                                <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
-                                    Ditolak
-                                </div>
-                                <div class="h5 mb-0 font-weight-bold text-gray-800">
-                                    {{ \App\Models\PengirimanBerkas::where('petugas_pengirim_id', Auth::id())->where('status', 'ditolak')->count() }}
-                                </div>
-                            </div>
-                            <div class="col-auto">
-                                <i class="fas fa-times-circle fa-2x text-gray-300"></i>
-                            </div>
+                        <div class="h4 font-weight-bold text-gray-800">
+                            {{ $ditolak }}
                         </div>
+                        <div class="h5 font-weight-bold text-danger">Ditolak</div>
                     </div>
                 </div>
             </div>
+
         </div>
-
-
         <!-- Main Table -->
         <div class="card shadow">
             <div class="card-header py-3 d-flex justify-content-between align-items-center">
@@ -134,6 +97,48 @@
                     </a>
                 @endif
             </div>
+            <!-- FILTER -->
+            <form method="GET" class="mb-4 align-items-center">
+                <div class="row ">
+
+                    <div class="col-md-3">
+                        <select name="bulan" class="form-control">
+                            <option value="">-- Pilih Bulan --</option>
+                            @foreach([
+                                1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',
+                                5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',
+                                9=>'September',10=>'Oktober',11=>'November',12=>'Desember'
+                            ] as $key => $val)
+                                <option value="{{ $key }}" {{ request('bulan') == $key ? 'selected' : '' }}>
+                                    {{ $val }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <select name="tahun" class="form-control">
+                            <option value="">-- Pilih Tahun --</option>
+                            @for($i = date('Y'); $i >= 2020; $i--)
+                                <option value="{{ $i }}" {{ request('tahun') == $i ? 'selected' : '' }}>
+                                    {{ $i }}
+                                </option>
+                            @endfor
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <button class="btn btn-primary">
+                            <i class="fas fa-filter"></i> Filter
+                        </button>
+
+                        <a href="{{ route('user.pengiriman') }}" class="btn btn-secondary">
+                            Reset
+                        </a>
+                    </div>
+
+                </div>
+            </form>
             <div class="card-body">
                 @if ($riwayat->count() > 0)
                     <div class="table-responsive">
@@ -152,7 +157,7 @@
                                     <tr class="table-row" data-status="{{ $item->status }}"
                                         data-asal="{{ $item->asal_berkas }}"
                                         data-bulan="{{ $item->created_at->format('Y-m') }}">
-                                        <td class="text-center">{{ $loop->iteration }}</td>
+                                        <td class="text-center">{{ $riwayat->firstItem() + $loop->index }}</td>
                                         <td>
                                             <strong class="text-primary">{{ $item->kode_permohonan }}</strong><br>
                                             {{-- <small class="text-muted">ID: {{ $item->id }}</small> --}}
@@ -212,101 +217,4 @@
         </div>
 
     </div>
-    <!-- Script untuk filter dan modal -->
-@section('scripts')
-    <script>
-        $(document).ready(function() {
-            // Filter functionality
-            function applyFilter() {
-                const status = $('#filterStatus').val();
-                const asal = $('#filterAsal').val();
-                const bulan = $('#filterBulan').val();
-
-                $('.table-row').each(function() {
-                    const rowStatus = $(this).data('status');
-                    const rowAsal = $(this).data('asal');
-                    const rowBulan = $(this).data('bulan');
-
-                    let show = true;
-
-                    if (status && rowStatus !== status) show = false;
-                    if (asal && rowAsal !== asal) show = false;
-                    if (bulan && rowBulan !== bulan) show = false;
-
-                    $(this).toggle(show);
-                });
-            }
-
-            $('#filterStatus, #filterAsal, #filterBulan').on('change', applyFilter);
-
-            $('#btnResetFilter').on('click', function() {
-                $('#filterStatus, #filterAsal').val('');
-                $('#filterBulan').val('{{ date('Y-m') }}');
-                applyFilter();
-            });
-                // Set status dengan badge
-                const status = $(this).data('status');
-                let statusHtml = '';
-
-                switch (status) {
-                    case 'menunggu':
-                        statusHtml =
-                            '<span class="badge badge-warning p-2"><i class="fas fa-clock mr-1"></i>Menunggu</span>';
-                        break;
-                    case 'diterima':
-                        statusHtml =
-                            '<span class="badge badge-success p-2"><i class="fas fa-check mr-1"></i>Diterima</span>';
-                        break;
-                    case 'ditolak':
-                        statusHtml =
-                            '<span class="badge badge-danger p-2"><i class="fas fa-times mr-1"></i>Ditolak</span>';
-                        break;
-                }
-
-                $('#modalStatus').html(statusHtml);
-            });
-
-            // Auto refresh setiap 60 detik untuk update status
-            setInterval(function() {
-                location.reload();
-            }, 60000);
-        });
-
-
-        function refreshStatus() {
-            $('.table-row').each(function() {
-                const row = $(this);
-                const pengirimanId = row.find('small.text-muted').text().replace('ID: ', '');
-
-                if (pengirimanId) {
-                    $.ajax({
-                        url: `/user/pengiriman/check-status/${pengirimanId}`,
-                        type: 'GET',
-                        success: function(response) {
-                            if (response.success) {
-                                // Update badge status
-                                const statusCell = row.find('td:nth-child(5)');
-                                const badgeClass = response.status_badge === 'warning' ?
-                                    'badge-warning' :
-                                    response.status_badge === 'success' ? 'badge-success' :
-                                    'badge-danger';
-                                const icon = response.status_badge === 'warning' ? 'fa-clock' :
-                                    response.status_badge === 'success' ? 'fa-check' : 'fa-times';
-
-                                statusCell.html(`
-                            <span class="badge ${badgeClass} p-2">
-                                <i class="fas ${icon} mr-1"></i>${response.status_text}
-                            </span>
-                        `);
-                            }
-                        }
-                    });
-                }
-            });
-        }
-
-        // Jalankan setiap 10 detik
-        setInterval(refreshStatus, 10000);
-    </script>
-@endsection
 @endsection

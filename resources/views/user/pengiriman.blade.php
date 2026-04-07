@@ -34,11 +34,11 @@
 
                 <div class="form-group">
                     <label>Kode Permohonan</label>
-                    <input type="text"
-                           name="kode_permohonan"
-                           class="form-control"
-                           placeholder="Contoh: 2928000011968861"
-                           required>
+                    <textarea name="kode_permohonan"
+                        class="form-control"
+                        rows="4"
+                        placeholder="Masukkan beberapa kode (pisahkan enter/koma)"
+                        required></textarea>
                 </div>
 
                 <button class="btn btn-primary">
@@ -49,63 +49,78 @@
     </div>
 
     {{-- ================= HASIL DATA SIMKIM ================= --}}
-    @if (session('simkim'))
-        @php
-            $data = session('simkim');
-            $permohonan = $data['permohonan'];
-        @endphp
+    @if(session('simkim_multiple'))
 
-        <div class="card shadow">
-            <div class="card-header bg-info text-white">
-                <strong>Detail Permohonan</strong>
+        <div class="card shadow mt-4">
+            <div class="card-header bg-success text-white">
+                <strong>Hasil Pencarian Multiple</strong>
             </div>
 
             <div class="card-body">
-                <table class="table table-bordered">
-                    <tr>
-                        <th>Kode Permohonan</th>
-                        <td>{{ $permohonan['nopermohonan'] }}</td>
-                    </tr>
-                    <tr>
-                        <th>Nama Lengkap</th>
-                        <td>{{ $permohonan['nama_lengkap'] }}</td>
-                    </tr>
-                    <tr>
-                        <th>No Paspor</th>
-                        <td>{{ $permohonan['nopaspor'] }}</td>
-                    </tr>
-                    <tr>
-                        <th>Tanggal Permohonan</th>
-                        <td>{{ $permohonan['tanggal_permohonan'] }}</td>
-                    </tr>
-                    <tr>
-                        <th>UPT</th>
-                        <td>{{ $data['upt']['nama'] }}</td>
-                    </tr>
-                    <tr>
-                        <th>Status Proses</th>
-                        <td>
-                            <span class="badge badge-info">
-                                {{ $permohonan['alurterakhir'] }}
-                            </span>
-                        </td>
-                    </tr>
-                </table>
 
-                {{-- ================= TOMBOL KIRIM ================= --}}
-                <form method="POST" action="{{ route('user.pengiriman.store') }}">
+                {{-- ERROR --}}
+                @if(session('simkim_error') && count(session('simkim_error')))
+                    <div class="alert alert-danger">
+                        <strong>Gagal ditemukan:</strong>
+                        {{ implode(', ', session('simkim_error')) }}
+                    </div>
+                @endif
+
+                {{-- DUPLIKAT --}}
+                @if(session('simkim_duplicate') && count(session('simkim_duplicate')))
+                    <div class="alert alert-warning">
+                        <strong>Sudah pernah dikirim:</strong>
+                        {{ implode(', ', session('simkim_duplicate')) }}
+                    </div>
+                @endif
+
+                <form method="POST" action="{{ route('user.pengiriman.store.multiple') }}">
                     @csrf
-                    <input type="hidden" name="kode_permohonan"
-                        value="{{ $permohonan['nopermohonan'] }}">
 
-                    <input type="hidden" name="simkim_snapshot"
-                       value='@json($data)'>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th width="5%">#</th>
+                                    <th>Kode</th>
+                                    <th>Nama</th>
+                                    <th>No Paspor</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach(session('simkim_multiple') as $i => $data)
+                                    @php $p = $data['permohonan']; @endphp
+                                    <tr>
+                                        <td>{{ $i+1 }}</td>
+                                        <td>{{ $p['nopermohonan'] }}</td>
+                                        <td>{{ $p['nama_lengkap'] }}</td>
+                                        <td>{{ $p['nopaspor'] }}</td>
+                                        <td>
+                                            <span class="badge badge-info">
+                                                {{ $p['alurterakhir'] }}
+                                            </span>
+                                        </td>
+                                    </tr>
+
+                                    {{-- Hidden input untuk dikirim --}}
+                                    <input type="hidden" name="data[]"
+                                        value='@json($data)'>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+
                     <button class="btn btn-success">
-                        <i class="fas fa-paper-plane mr-1"></i> Kirim Berkas
+                        <i class="fas fa-paper-plane mr-1"></i>
+                        Kirim Semua Berkas
                     </button>
                 </form>
+
             </div>
         </div>
+
     @endif
         {{-- <h4>Data Hasil Sinkronisasi Otomatis</h4> --}}
 

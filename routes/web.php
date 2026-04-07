@@ -100,22 +100,24 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [PenerimaanArsipController::class, 'index'])->name('index');
 
             Route::get('/{id}/preview',
-    [PenerimaanArsipController::class,'preview']);
+                    [PenerimaanArsipController::class,'preview']);
 
-Route::post('/{id}/terima',
-    [PenerimaanArsipController::class,'terima']);
+            Route::post('/{id}/terima',
+                [PenerimaanArsipController::class,'terima']);
 
-Route::post('/{id}/tolak',
-    [PenerimaanArsipController::class,'tolak'])->name('tolak');
+            Route::post('/{id}/tolak',
+                [PenerimaanArsipController::class,'tolak'])->name('tolak');
 
-Route::get('/{id}/detail',
-    [PenerimaanArsipController::class,'show'])->name('detail');
+            Route::get('/{id}/detail',
+                [PenerimaanArsipController::class,'show'])->name('detail');
 
             Route::get('/lemari/{lemari}/lokers', [PenerimaanArsipController::class, 'getLokersByLemari'])
                 ->name('lokers');
 
             Route::get('/loker/{loker}/generate-nomor-arsip', [LokerController::class, 'generateNomorArsip'])
                 ->name('generate-nomor-arsip');
+            Route::post('/bulk', [PenerimaanArsipController::class, 'bulkTerima'])
+                ->name('bulk');
         });
 
         /*
@@ -190,8 +192,9 @@ Route::get('/{id}/detail',
             ->name('pengiriman.kirim-perbaikan');
         Route::post('/pengiriman/fetch-simkim', [PengirimanBerkasController::class, 'fetchSimkim'])
             ->name('pengiriman.fetch');
-        Route::post('/pengiriman/sync/{id}', [PengirimanBerkasController::class, 'kirimDariSync'])
-            ->name('user.pengiriman.sync');
+
+        Route::post('/pengiriman/store-multiple', [PengirimanBerkasController::class, 'storeMultiple'])
+            ->name('pengiriman.store.multiple');
         Route::get('/berita-acara', [BeritaAcaraController::class, 'index'])
             ->name('berita-acara.index');
         Route::get('/berita-acara/generate', [BeritaAcaraController::class, 'generate'])
