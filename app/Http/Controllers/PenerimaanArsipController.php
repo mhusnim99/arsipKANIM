@@ -43,7 +43,7 @@ class PenerimaanArsipController extends Controller
             $query->where('petugas_pengirim_id', $request->petugas);
         }
 
-        $pengirimanBerkas = $query->paginate(10)->withQueryString();
+        $pengirimanBerkas = $query->latest()->limit(100)->get();
 
         // 📊 Statistik
         $totalMenunggu = PengirimanBerkas::where('status', 'menunggu')->count();
@@ -75,100 +75,108 @@ class PenerimaanArsipController extends Controller
     /**
      * Proses menerima arsip
      */
-public function terima($id)
-{
-    $result = DB::transaction(function () use ($id) {
+    public function terima($id)
+    {
+        $result = DB::transaction(function () use ($id) {
 
-        $pengiriman = PengirimanBerkas::lockForUpdate()->findOrFail($id);
+            $pengiriman = PengirimanBerkas::lockForUpdate()->findOrFail($id);
 
-        if ($pengiriman->status !== 'menunggu') {
-            throw new \Exception('Berkas sudah diproses');
-        }
+            if ($pengiriman->status !== 'menunggu') {
+                throw new \Exception('Berkas sudah diproses');
+            }
 
-        // 🔹 Ambil snapshot SIMKIM
-        $snapshot = $pengiriman->simkim_snapshot;
+            // 🔹 Ambil snapshot SIMKIM
+            $snapshot = $pengiriman->simkim_snapshot;
 
-        if (!$snapshot || !isset($snapshot['permohonan'])) {
-            throw new \Exception('Snapshot SIMKIM tidak ditemukan');
-        }
+            if (!$snapshot || !isset($snapshot['permohonan'])) {
+                throw new \Exception('Snapshot SIMKIM tidak ditemukan');
+            }
 
-        $permohonan = $snapshot['permohonan'];
+            $permohonan = $snapshot['permohonan'];
 
-        // 🔹 Cari loker aktif yang masih punya slot
-        $loker = Loker::lockForUpdate()
-            ->where('status', 'aktif')
-            ->get()
-            ->first(function ($l) {
-                return $l->jumlahArsip() < $l->kapasitas;
-            });
+            // 🔹 Cari loker aktif yang masih punya slot
+            $loker = Loker::lockForUpdate()
+                ->where('status', 'aktif')
+                ->get()
+                ->first(function ($l) {
+                    return $l->jumlahArsip() < $l->kapasitas;
+                });
 
-        if (!$loker) {
-            throw new \Exception('Tidak ada loker aktif');
-        }
+            if (!$loker) {
+                throw new \Exception('Tidak ada loker aktif');
+            }
 
-        // 🔹 Generate nomor arsip otomatis
-        $lastArsip = Arsip::where('loker_id', $loker->id)
-    ->orderByDesc('id')
-    ->first();
+            // 🔹 Generate nomor arsip otomatis
+            $lastArsip = Arsip::where('loker_id', $loker->id)
+                ->orderByDesc('id')
+                ->first();
 
-if ($lastArsip) {
-    $lastNumber = (int) substr($lastArsip->nomor_arsip, -4);
-    $nomorUrut = $lastNumber + 1;
-} else {
-    $nomorUrut = 1;
-}
-        $nomorFormatted = str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
-        $nomorArsip = "{$loker->lemari->kode_lemari}.{$loker->kode_loker}.{$nomorFormatted}";
+            $lastArsip = Arsip::where('loker_id', $loker->id)
+                ->orderByDesc('id')
+                ->lockForUpdate()
+                ->first();
 
-        // 🔹 FIX: kasih fallback biar gak NULL
-        $namaLengkap = $permohonan['nama_lengkap'] ?? 'Tidak diketahui';
-        $nomorPaspor = $permohonan['nopaspor'] ?? '-';
+            if ($lastArsip) {
+                $lastNumber = (int) substr($lastArsip->nomor_arsip, -4);
+                $nomorUrut = $lastNumber + 1;
+            } else {
+                $nomorUrut = 1;
+            }
+            $nomorFormatted = str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
+            $nomorArsip = "{$loker->lemari->kode_lemari}.{$loker->kode_loker}.{$nomorFormatted}";
 
-        // 🔹 Simpan arsip
-        $arsip = Arsip::create([
-            'pengiriman_berkas_id' => $pengiriman->id,
-            'kode_permohonan'      => $permohonan['nopermohonan'],
-            'nomor_arsip'          => $nomorArsip,
-            'tanggal_masuk'        => now(),
-            'asal_berkas'          => $pengiriman->asal_berkas,
-            'lemari_id'            => $loker->lemari_id,
-            'loker_id'             => $loker->id,
-            'status'               => 'tersimpan',
-            'diterima_oleh'        => Auth::id(),
+            // 🔹 FIX: kasih fallback biar gak NULL
+            $namaLengkap = $permohonan['nama_lengkap'] ?? 'Tidak diketahui';
+            $nomorPaspor = $permohonan['nopaspor'] ?? '-';
 
-            // 🔹 DATA (SUDAH AMAN)
-            'nama_lengkap'         => $namaLengkap,
-            'nomor_paspor'         => $nomorPaspor,
-            'tanggal_permohonan'   => $permohonan['tanggal_permohonan'] ?? null,
-            'status_proses'        => $permohonan['alurterakhir'] ?? null,
+            // 🔹 Simpan arsip
+            $arsip = Arsip::create([
+                'pengiriman_berkas_id' => $pengiriman->id,
+                'kode_permohonan'      => $permohonan['nopermohonan'],
+                'nomor_arsip'          => $nomorArsip,
+                'tanggal_masuk'        => now(),
+                'asal_berkas'          => $pengiriman->asal_berkas,
+                'lemari_id'            => $loker->lemari_id,
+                'loker_id'             => $loker->id,
+                'status'               => 'tersimpan',
+                'diterima_oleh'        => Auth::id(),
 
-            'keterangan'           => null,
-        ]);
+                // 🔹 DATA (SUDAH AMAN)
+                'nama_lengkap'         => $namaLengkap,
+                'nomor_paspor'         => $nomorPaspor,
+                'tanggal_permohonan'   => $permohonan['tanggal_permohonan'] ?? null,
+                'status_proses'        => $permohonan['alurterakhir'] ?? null,
 
-        // 🔹 Sync status loker & lemari
-        $loker->syncStatus();
-        $loker->lemari->syncStatus();
+                'keterangan'           => null,
+            ]);
 
-        // 🔹 Update pengiriman
-        $pengiriman->update([
-            'status'      => 'diterima',
-            'arsip_id'    => $arsip->id,
-            'nomor_arsip' => $nomorArsip,
-        ]);
+            // 🔹 Sync status loker & lemari
+            $loker->syncStatus();
+            $loker->lemari->syncStatus();
 
-        return [
-            'kode_permohonan' => $permohonan['nopermohonan'],
-            'lokasi' => 'Lemari ' . $loker->lemari->kode_lemari .
-                        ' / Loker ' . $loker->kode_loker,
-            'status' => 'Tersimpan',
-        ];
-    });
+            // 🔹 Update pengiriman
+            $pengiriman->update([
+                'status'      => 'diterima',
+                'arsip_id'    => $arsip->id,
+                'nomor_arsip' => $nomorArsip,
+            ]);
+
+            return [
+                'kode_permohonan' => $permohonan['nopermohonan'],
+                'lokasi' => 'Lemari ' . $loker->lemari->kode_lemari .
+                    ' / Loker ' . $loker->kode_loker,
+                'status' => 'Tersimpan',
+            ];
+        });
 
         return response()->json([
             'success' => true,
             'data'    => $result,
         ]);
     }
+
+
+
 
     public function preview($id)
     {
@@ -289,9 +297,21 @@ if ($lastArsip) {
 
                 if (!$loker) continue;
 
-                $nomorUrut = $loker->jumlahArsip() + 1;
-                $nomorFormatted = str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
-                $nomorArsip = "{$loker->lemari->kode_lemari}.{$loker->kode_loker}.{$nomorFormatted}";
+                $lastArsip = Arsip::where('loker_id', $loker->id)
+                    ->lockForUpdate()
+                    ->latest('id')
+                    ->first();
+
+                $nomorUrut = $lastArsip
+                    ? ((int) substr($lastArsip->nomor_arsip, -4)) + 1
+                    : 1;
+
+                $nomorArsip = sprintf(
+                    "%s.%s.%04d",
+                    $loker->lemari->kode_lemari,
+                    $loker->kode_loker,
+                    $nomorUrut
+                );
 
                 $arsip = Arsip::create([
                     'pengiriman_berkas_id' => $pengiriman->id,

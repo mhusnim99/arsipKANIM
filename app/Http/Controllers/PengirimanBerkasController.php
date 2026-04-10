@@ -125,6 +125,8 @@ class PengirimanBerkasController extends Controller
             'status_badge'  => $pengiriman->status_badge,
         ]);
     }
+
+
     public function fetchSimkim(Request $request, SimkimApiService $simkim)
     {
         $request->validate([
@@ -133,6 +135,8 @@ class PengirimanBerkasController extends Controller
 
         // 🔹 Pecah input (bisa enter, koma, spasi)
         $kodeList = preg_split('/[\s,]+/', trim($request->kode_permohonan));
+
+
 
         $results = [];
         $errors = [];
@@ -152,21 +156,19 @@ class PengirimanBerkasController extends Controller
                 continue;
             }
 
-            try {
-                $result = $simkim->getPermohonanByKode($kode);
+  try {
+    $result = $simkim->getPermohonanByKode($kode);
 
-                // 🔹 Validasi response API
-                if (($result['success'] ?? false) &&
-                    ($result['data']['permohonan']['alurterakhir'] ?? '') === 'SELESAI'
-                ) {
 
-                    $results[] = $result['data'];
-                } else {
-                    $errors[] = $kode;
-                }
-            } catch (\Exception $e) {
-                $errors[] = $kode;
-            }
+ if (!empty($result) && isset($result['data'])) {
+    $results[] = $result['data'];
+} else {
+    $errors[] = $kode;
+}
+
+} catch (\Exception $e) {
+    $errors[] = $kode;
+}
 
             // 🔹 Anti spam API (delay 0.2 detik)
             usleep(200000);
@@ -183,6 +185,9 @@ class PengirimanBerkasController extends Controller
             'simkim_duplicate' => $duplicates
         ]);
     }
+
+
+
     public function storeMultiple(Request $request)
     {
         $request->validate([
