@@ -261,4 +261,67 @@ if ($lastArsip) {
             ]
         ]);
     }
+
+    public function bulkTerima(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array'
+        ]);
+
+        DB::transaction(function () use ($request) {
+
+            $pengirimanList = PengirimanBerkas::whereIn('id', $request->ids)
+                ->where('status', 'menunggu')
+                ->lockForUpdate()
+                ->get();
+
+            foreach ($pengirimanList as $pengiriman) {
+
+                $snapshot = $pengiriman->simkim_snapshot;
+                $permohonan = $snapshot['permohonan'] ?? null;
+
+                if (!$permohonan) continue;
+
+                $loker = Loker::lockForUpdate()
+                    ->where('status', 'aktif')
+                    ->get()
+                    ->first(fn($l) => $l->jumlahArsip() < $l->kapasitas);
+
+                if (!$loker) continue;
+
+                $nomorUrut = $loker->jumlahArsip() + 1;
+                $nomorFormatted = str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
+                $nomorArsip = "{$loker->lemari->kode_lemari}.{$loker->kode_loker}.{$nomorFormatted}";
+
+                $arsip = Arsip::create([
+                    'pengiriman_berkas_id' => $pengiriman->id,
+                    'kode_permohonan'      => $permohonan['nopermohonan'],
+                    'nomor_arsip'          => $nomorArsip,
+                    'tanggal_masuk'        => now(),
+                    'asal_berkas'          => $pengiriman->asal_berkas,
+                    'lemari_id'            => $loker->lemari_id,
+                    'loker_id'             => $loker->id,
+                    'status'               => 'tersimpan',
+                    'diterima_oleh'        => Auth::id(),
+
+                    'nama_lengkap'         => $permohonan['nama_lengkap'] ?? null,
+                    'nomor_paspor'         => $permohonan['nopaspor'] ?? null,
+                    'tanggal_permohonan'   => $permohonan['tanggal_permohonan'] ?? null,
+                    'status_proses'        => $permohonan['alurterakhir'] ?? null,
+                ]);
+
+                // update status
+                $loker->syncStatus();
+                $loker->lemari->syncStatus();
+
+                $pengiriman->update([
+                    'status' => 'diterima',
+                    'arsip_id' => $arsip->id,
+                    'nomor_arsip' => $nomorArsip,
+                ]);
+            }
+        });
+
+        return back()->with('success', 'Berkas berhasil diterima secara massal');
+    }
 }
