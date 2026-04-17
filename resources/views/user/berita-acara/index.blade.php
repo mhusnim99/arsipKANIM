@@ -30,7 +30,7 @@
             </tbody>
         </table>
 
-        <button class="btn btn-primary">Generate Berita Acara</button>
+        <button class="btn btn-primary">Download Berita Acara</button>
     </form>
 
 @endsection

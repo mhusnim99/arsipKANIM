@@ -270,7 +270,7 @@ class PenerimaanArsipController extends Controller
         ]);
     }
 
-    public function bulkTerima(Request $request)
+        public function bulkTerima(Request $request)
     {
         $request->validate([
             'ids' => 'required|array'
@@ -283,6 +283,23 @@ class PenerimaanArsipController extends Controller
                 ->lockForUpdate()
                 ->get();
 
+            // 🔥 ambil loker sekali saja
+            $loker = Loker::lockForUpdate()
+                ->where('status', 'aktif')
+                ->get()
+                ->first(fn($l) => $l->jumlahArsip() < $l->kapasitas);
+
+            if (!$loker) {
+                throw new \Exception('Tidak ada loker tersedia');
+            }
+
+            // 🔥 HITUNG KONDISI AWAL
+            $totalArsip = $loker->jumlahArsip();
+            $kapasitas = $loker->kapasitas;
+
+            $currentSlot = floor($totalArsip / $kapasitas) + 1;
+            $slotCount = $totalArsip % $kapasitas;
+
             foreach ($pengirimanList as $pengiriman) {
 
                 $snapshot = $pengiriman->simkim_snapshot;
@@ -290,21 +307,14 @@ class PenerimaanArsipController extends Controller
 
                 if (!$permohonan) continue;
 
-                $loker = Loker::lockForUpdate()
-                    ->where('status', 'aktif')
-                    ->get()
-                    ->first(fn($l) => $l->jumlahArsip() < $l->kapasitas);
+                // 🔥 kalau slot penuh → pindah slot
+                if ($slotCount >= $kapasitas) {
+                    $currentSlot++;
+                    $slotCount = 0;
+                }
 
-                if (!$loker) continue;
-
-                $lastArsip = Arsip::where('loker_id', $loker->id)
-                    ->lockForUpdate()
-                    ->latest('id')
-                    ->first();
-
-                $nomorUrut = $lastArsip
-                    ? ((int) substr($lastArsip->nomor_arsip, -4)) + 1
-                    : 1;
+                // 🔥 nomor urut GLOBAL (bukan per loop DB)
+                $nomorUrut = $totalArsip + 1;
 
                 $nomorArsip = sprintf(
                     "%s.%s.%04d",
@@ -321,6 +331,7 @@ class PenerimaanArsipController extends Controller
                     'asal_berkas'          => $pengiriman->asal_berkas,
                     'lemari_id'            => $loker->lemari_id,
                     'loker_id'             => $loker->id,
+                    'slot'                 => $currentSlot, // 🔥 INI PENTING
                     'status'               => 'tersimpan',
                     'diterima_oleh'        => Auth::id(),
 
@@ -330,9 +341,9 @@ class PenerimaanArsipController extends Controller
                     'status_proses'        => $permohonan['alurterakhir'] ?? null,
                 ]);
 
-                // update status
-                $loker->syncStatus();
-                $loker->lemari->syncStatus();
+                // update counter
+                $slotCount++;
+                $totalArsip++;
 
                 $pengiriman->update([
                     'status' => 'diterima',
@@ -340,6 +351,9 @@ class PenerimaanArsipController extends Controller
                     'nomor_arsip' => $nomorArsip,
                 ]);
             }
+
+            $loker->syncStatus();
+            $loker->lemari->syncStatus();
         });
 
         return back()->with('success', 'Berkas berhasil diterima secara massal');

@@ -67,7 +67,7 @@ class Loker extends Model
     public function getDisplayAttribute(): string
     {
         $this->loadMissing('lemari');
-        return "{$this->lemari->kode_lemari}.{$this->kolom}{$this->baris}";
+        return "{$this->kolom}{$this->baris}";
     }
 
     public function getStatusBadgeAttribute(): string

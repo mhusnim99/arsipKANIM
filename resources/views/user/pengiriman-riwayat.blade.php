@@ -76,9 +76,9 @@
             @if ($pengirimanMenunggu)
                 <form action="{{ route('user.berita-acara.generate') }}" method="POST">
                     @csrf
-                    <button class="btn btn-success btn-sm">
-                        <i class="fas fa-file-signature mr-1"></i>
-                        Generate Berita Acara
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fas fa-download mr-1"></i>
+                        Download Berita Acara
                     </button>
                 </form>
             @elseif ($beritaAcaraTerakhir)

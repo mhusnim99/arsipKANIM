@@ -183,77 +183,67 @@ tanggal
 <b>{{ \Carbon\Carbon::parse($beritaAcara->tanggal_dibuat)->locale('id')->translatedFormat('d F Y') }}</b>,
 telah melaksanakan serah terima arsip pada <b>{{ Auth::user()->kantor }}</b> oleh <b>Bidang TKIM</b> dengan keterangan sebagai berikut:
 </p>
-<table style="width:100%">
+<table style="width:100% align:center">
   <tr>
     <td><b>Bulan</b></td>
-    <td><b>Tahun</b></td>
-    <td><b>Jumlah</b></td>
+    <td><b>Jumlah Arsip</b></td>
   </tr>
   <tr>
     <td>Januari</td>
-    <td></td>
     <td></td>
   </tr>
   <tr>
     <td>Februari</td>
     <td></td>
-    <td></td>
   </tr>
   <tr>
     <td>Maret</td>
-    <td></td>
     <td></td>
   </tr>
   <tr>
     <td>April</td>
     <td></td>
-    <td></td>
   </tr>
   <tr>
     <td>Mei</td>
-    <td></td>
     <td></td>
   </tr>
   <tr>
     <td>Juni</td>
     <td></td>
-    <td></td>
   </tr>
   <tr>
     <td>Juli</td>
-    <td></td>
     <td></td>
   </tr>
   <tr>
     <td>Agustus</td>
     <td></td>
-    <td></td>
   </tr>
   <tr>
     <td>September</td>
-    <td></td>
     <td></td>
   </tr>
   <tr>
     <td>Oktober</td>
     <td></td>
-    <td></td>
   </tr>
   <tr>
     <td>November</td>
-    <td></td>
     <td></td>
   </tr>
   <tr>
     <td>Desember</td>
     <td></td>
+  </tr>
+  <tr>
+    <td><b>Total jumlah arsip yang diserahkan </b></td>
     <td></td>
   </tr>
 </table>
 
 <!-- ================= PENUTUP ================= -->
 <p class="section"> </p>
-<b>Total jumlah arsip yang diserahkan : </b>
 <p>
 Demikian Berita Acara Serah Terima Arsip ini dibuat dengan sebenar-benarnya
 untuk dipergunakan sebagaimana mestinya. Sejak ditandatanganinya berita acara

@@ -101,25 +101,35 @@
                                 <th>Kode Permohonan</th>
                                 <th>Nama</th>
                                 <th>No. Paspor</th>
+                                <th>Asal Berkas</th>
                                 <th>Status</th>
                             </tr>
                         </thead>
 
                         <tbody>
                         @foreach(session('simkim_multiple') as $i => $data)
-                            @php $p = $data['permohonan']; @endphp
+                            @php 
+                                $p = $data['permohonan'];
+                                $u = $data['upt'] ?? [];
+                            @endphp
                             <tr>
                                 <td>{{ $i+1 }}</td>
                                 <td><strong>{{ $p['nopermohonan'] }}</strong></td>
                                 <td>{{ $p['nama_lengkap'] }}</td>
                                 <td>{{ $p['nopaspor'] }}</td>
+                                {{-- ✅ PERBAIKAN: Ambil nama dari UPT, bukan dari permohonan --}}
                                 <td>
                                     <span class="badge badge-info px-3 py-2">
+                                        {{ $u['nama'] ?? 'Tidak diketahui' }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge badge-primary px-3 py-2">
                                         {{ $p['alurterakhir'] }}
                                     </span>
                                 </td>
                             </tr>
-
+ 
                             <input type="hidden" name="data[]" value='@json($data)'>
                         @endforeach
                         </tbody>

@@ -3,10 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\BeritaAcara;
-use App\Models\PengirimanBerkas;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 
@@ -27,63 +25,42 @@ class BeritaAcaraController extends Controller
 
 
     /**
-     * Generate berita acara otomatis
-     * mengambil semua pengiriman status menunggu
+     * Generate berita acara (VERSI BARU)
+     * Tidak mengambil data pengiriman
+     * Langsung generate PDF
      */
     public function generate()
     {
         $user = Auth::user();
 
-        $pengiriman = PengirimanBerkas::where('petugas_pengirim_id', $user->id)
-            ->where('status', 'menunggu')
-            ->whereNull('berita_acara_id')
-            ->get();
+        // Generate nomor otomatis
+        $nomor = 'BA/' . date('Y') . '/' . str_pad(BeritaAcara::count() + 1, 4, '0', STR_PAD_LEFT);
 
-        if ($pengiriman->count() == 0) {
-            return back()->with('error', 'Tidak ada data pengiriman yang bisa dibuat berita acara.');
-        }
-
-        DB::beginTransaction();
-
-        try {
-
-            $beritaAcara = BeritaAcara::create([
-                'petugas_pengirim_id' => $user->id,
-                'tanggal_dibuat' => now(),
-                'jumlah_arsip' => $pengiriman->count(),
-            ]);
-
-            foreach ($pengiriman as $item) {
-                $item->update([
-                    'berita_acara_id' => $beritaAcara->id
-                ]);
-            }
-
-            DB::commit();
-        } catch (\Exception $e) {
-
-            DB::rollBack();
-            return back()->with('error', 'Gagal membuat berita acara');
-        }
-
-        $pdf = Pdf::loadView('user.berita-acara.pdf', [
-            'beritaAcara' => $beritaAcara,
-            'pengiriman' => $pengiriman
+        // Simpan ke database
+        $beritaAcara = BeritaAcara::create([
+            'nomor_berita_acara' => $nomor,
+            'petugas_pengirim_id' => $user->id,
+            'tanggal_dibuat' => now(),
+            'jumlah_arsip' => 0 // default, bisa dikembangkan nanti
         ]);
 
-        $fileName = 'berita-acara-' . $beritaAcara->id . '.pdf';
+        // Generate PDF
+        $pdf = Pdf::loadView('user.berita-acara.pdf', [
+            'beritaAcara' => $beritaAcara
+        ]);
 
-        return $pdf->stream($fileName);
+        $fileName = 'berita-acara-' . str_replace('/', '-', $nomor) . '.pdf';
+
+        return $pdf->download($fileName);
     }
 
 
     /**
-     * Detail berita acara
+     * Detail berita acara (opsional, tanpa pengiriman)
      */
     public function show($id)
     {
-        $beritaAcara = BeritaAcara::with('pengirimanBerkas')
-            ->where('petugas_pengirim_id', Auth::id())
+        $beritaAcara = BeritaAcara::where('petugas_pengirim_id', Auth::id())
             ->findOrFail($id);
 
         return view('user.berita-acara.show', compact('beritaAcara'));
@@ -91,19 +68,18 @@ class BeritaAcaraController extends Controller
 
 
     /**
-     * Generate dan download PDF berita acara
+     * Download ulang PDF berita acara
      */
     public function generatePdf($id)
     {
-        $beritaAcara = BeritaAcara::with('pengirimanBerkas')
-            ->where('petugas_pengirim_id', Auth::id())
+        $beritaAcara = BeritaAcara::where('petugas_pengirim_id', Auth::id())
             ->findOrFail($id);
 
         $pdf = Pdf::loadView('user.berita-acara.pdf', [
             'beritaAcara' => $beritaAcara
         ]);
 
-        $fileName = 'berita-acara-' . $beritaAcara->id . '.pdf';
+        $fileName = 'berita-acara-' . str_replace('/', '-', $beritaAcara->nomor_berita_acara) . '.pdf';
 
         $path = 'berita-acara/' . $fileName;
 

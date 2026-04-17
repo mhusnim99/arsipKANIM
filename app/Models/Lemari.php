@@ -81,14 +81,15 @@ class Lemari extends Model
 
         foreach ($koloms as $kolom) {
             for ($baris = 1; $baris <= $this->jumlah_baris_per_kolom; $baris++) {
+
+                $kodeLoker = "{$this->kode_lemari}.{$kolom}{$baris}";
+
                 Loker::create([
                     'lemari_id'  => $this->id,
-                    // 'kode_loker' => "{$this->kode_lemari}.{$kolom}." . str_pad($baris, 4, '0', STR_PAD_LEFT),
-                    'kode_loker' => "{$this->kode_lemari}.{$kolom}{$baris}",
+                    'kode_loker' => $kodeLoker,
                     'kolom'      => $kolom,
                     'baris'      => $baris,
                     'kapasitas'  => 350,
-                    'terisi'     => 0,
                     'status'     => 'aktif',
                 ]);
             }

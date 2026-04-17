@@ -331,7 +331,16 @@ $(document).on('click','.btn-terima', function () {
         $('#previewKode').text(d.kode_permohonan);
         $('#previewLemari').text(d.lemari);
         $('#previewLoker').text(d.loker);
-        $('#previewSlot').text(d.slot);
+        if (selectedIds.length > 1) {
+        $('#previewSlot').html(`
+            Slot awal: <b>${d.slot}</b><br>
+            <small class="text-muted">
+                Arsip akan otomatis menyebar ke slot berikutnya jika penuh
+            </small>
+        `);
+        } else {
+            $('#previewSlot').text(d.slot);
+        }
 
         $('#modalPreview').modal('show');
     })
@@ -368,7 +377,16 @@ $('#btnBulkTerima').click(function () {
         );
         $('#previewLemari').text(d.lemari);
         $('#previewLoker').text(d.loker);
-        $('#previewSlot').text(d.slot);
+        if (selectedIds.length > 1) {
+        $('#previewSlot').html(`
+            Slot awal: <b>${d.slot}</b><br>
+            <small class="text-muted">
+                Arsip akan otomatis menyebar ke slot berikutnya jika penuh
+            </small>
+        `);
+        } else {
+            $('#previewSlot').text(d.slot);
+        }
 
         $('#modalPreview').modal('show');
     })
