@@ -15,7 +15,28 @@ class ArsipController extends Controller
     'lemari:id,kode_lemari,nama_lemari',
     'loker:id,lemari_id,kode_loker,kolom,baris'
 ])
+
+//filter 3 hari
+->orderByRaw("
+    CASE
+        WHEN status = 'dipinjam'
+        AND tanggal_pinjam IS NOT NULL
+        AND tanggal_pinjam <= NOW() - INTERVAL 3 DAY
+        THEN 0
+        ELSE 1
+    END
+")
 ->orderByDesc('tanggal_masuk')
+
+//testing
+// ->orderByRaw("
+//     CASE
+//         WHEN status = 'dipinjam' THEN 0
+//         ELSE 1
+//     END
+// ")
+// ->orderByDesc('tanggal_masuk')
+
 ->orderByDesc('id');
 
     /* =====================

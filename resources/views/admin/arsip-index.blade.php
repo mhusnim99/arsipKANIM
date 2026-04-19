@@ -1,7 +1,7 @@
 @extends('layouts.admin')
 
 @section('main-content')
-<div class="container-fluid">
+<div class="container-fluid mb-5">
 
     {{-- HEADER --}}
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
@@ -79,7 +79,16 @@
 
                 <tbody>
                     @forelse ($arsips as $arsip)
-                        <tr>
+                    @php
+    $isTerlambat = $arsip->status === 'dipinjam'
+        && $arsip->tanggal_pinjam
+        && \Carbon\Carbon::parse($arsip->tanggal_pinjam)->diffInDays(now()) >= 3;
+@endphp
+
+{{-- @php
+    $isTerlambat = $arsip->status === 'dipinjam';
+@endphp --}}
+                        <tr class="{{ $isTerlambat ? 'table-danger' : '' }}">
                             <td>{{ $loop->iteration + ($arsips->currentPage() - 1) * $arsips->perPage() }}</td>
                             <td class="font-weight-bold">{{ $arsip->kode_permohonan }}</td>
                             <td><span class="badge badge-light border">{{ $arsip->nomor_arsip }}</span></td>
@@ -89,10 +98,16 @@
                             <td>{{ $arsip->tanggal_masuk->format('d/m/Y') }}</td>
 
                             <td>
-                                <span class="badge badge-{{ $arsip->status_badge }} px-3 py-1">
-                                    {{ $arsip->status_text }}
-                                </span>
-                            </td>
+    <span class="badge badge-{{ $arsip->status_badge }} px-3 py-1">
+        {{ $arsip->status_text }}
+    </span>
+
+    @if($isTerlambat)
+        <div class="text-danger small mt-1">
+            ⚠️ Telat > 3 hari
+        </div>
+    @endif
+</td>
 
                             <td>
                                 <div class="d-flex justify-content-center">

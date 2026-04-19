@@ -142,6 +142,9 @@ Route::middleware('auth')->group(function () {
 
          Route::get('/musnah', [MusnahBerkasController::class, 'index'])->name('musnah.index');
         Route::delete('/musnah/bulk-delete', [MusnahBerkasController::class, 'bulkDelete'])->name('musnah.bulkDelete');
+        Route::get('/musnah/{id}/download', [MusnahBerkasController::class, 'downloadPdf'])->name('musnah.download');
+        Route::get('/musnah/{id}/pdf', [MusnahBerkasController::class, 'showPdf'])->name('musnah.pdf');
+
 
     });
 

@@ -3,167 +3,171 @@
 @section('main-content')
 <div class="container-fluid">
 
-    {{-- ================= HEADER ================= --}}
+    <!-- HEADER -->
     <div class="d-sm-flex align-items-center justify-content-between mb-4">
         <h1 class="h3 font-weight-bold" style="color:#1E3A8A;">
-            Riwayat Musnah Berkas
+            Menu Musnah Berkas
         </h1>
     </div>
 
-    {{-- ================= SEARCH ================= --}}
-    <div class="card shadow-sm border-0 mb-4 rounded-3"
-         style="background: linear-gradient(135deg, #E0F2FE, #BFDBFE);">
-        <div class="card-body">
-            <form method="GET" action="{{ route('admin.musnah.index') }}">
-                <div class="row align-items-end">
+    @if (!isset($tahun))
 
-                    {{-- Nama --}}
-                    <div class="col-md-3 mb-2">
-                        <label class="fw-bold small text-primary">Nama</label>
-                        <input type="text" name="nama"
-                               class="form-control form-control-sm shadow-sm"
-                               placeholder="Cari nama"
-                               value="{{ request('nama') }}"
-                               style="border-radius:8px; background-color:#EFF6FF;">
-                    </div>
+        <!-- MODE FOLDER -->
+        <div class="row">
+            @forelse ($years as $th)
+                <div class="col-md-3 mb-4">
+                    <div class="card shadow border-0 text-center p-4">
 
-                    {{-- No Paspor --}}
-                    <div class="col-md-3 mb-2">
-                        <label class="fw-bold small text-primary">No Paspor</label>
-                        <input type="text" name="paspor"
-                               class="form-control form-control-sm shadow-sm"
-                               placeholder="Cari no paspor"
-                               value="{{ request('paspor') }}"
-                               style="border-radius:8px; background-color:#EFF6FF;">
-                    </div>
+                        <i class="fas fa-folder fa-3x mb-3" style="color:#f6c23e;"></i>
 
-                    {{-- Kode Permohonan --}}
-                    <div class="col-md-3 mb-2">
-                        <label class="fw-bold small text-primary">Kode Permohonan</label>
-                        <input type="text" name="kode"
-                               class="form-control form-control-sm shadow-sm"
-                               placeholder="Cari kode"
-                               value="{{ request('kode') }}"
-                               style="border-radius:8px; background-color:#EFF6FF;">
-                    </div>
+                        <h5 class="font-weight-bold mb-2">
+                            Berkas {{ $th }}
+                        </h5>
 
-                    {{-- Button --}}
-                    <div class="col-md-3 mb-2">
-                        <label class="d-block mb-1">&nbsp;</label>
-                        <div class="d-flex">
-                            <button class="btn btn-primary btn-sm shadow-sm mr-2"
-                                    style="border-radius:8px; min-width:90px;">
-                                <i class="fas fa-search mr-1"></i> Cari
+                        <p class="text-muted small mb-3">
+                            Arsip tahun {{ $th }}
+                        </p>
+
+                        <!-- BUTTON -->
+                        <a href="{{ route('admin.musnah.index', ['tahun' => $th]) }}"
+                           class="btn btn-sm shadow-sm mb-2"
+                           style="background:#1E3A8A; color:white;">
+                            <i class="fas fa-folder-open mr-1"></i> Buka
+                        </a>
+
+                        <form action="{{ route('admin.musnah.bulkDelete') }}"
+                              method="POST"
+                              onsubmit="return confirm('Hapus semua berkas tahun {{ $th }}?')">
+                            @csrf
+                            @method('DELETE')
+
+                            <input type="hidden" name="tahun" value="{{ $th }}">
+
+                            <button class="btn btn-sm btn-danger shadow-sm w-100">
+                                <i class="fas fa-trash mr-1"></i> Hapus
                             </button>
+                        </form>
 
-                            <a href="{{ route('admin.musnah.index') }}"
-                               class="btn btn-secondary btn-sm shadow-sm"
-                               style="border-radius:8px; min-width:90px;">
-                                Reset
-                            </a>
-                        </div>
                     </div>
-
                 </div>
-            </form>
+            @empty
+                <div class="col-12 text-center text-muted py-4">
+                    <i class="fas fa-folder-open fa-2x mb-2"></i>
+                    <br>Belum ada folder berkas
+                </div>
+            @endforelse
         </div>
-    </div>
 
-    {{-- ================= TABLE ================= --}}
-    <form method="POST" action="{{ route('admin.musnah.bulkDelete') }}">
-        @csrf
-        @method('DELETE')
+    @else
 
-        <div class="card shadow-sm border-0">
-            <div class="card-header bg-danger text-white font-weight-bold d-flex justify-content-between align-items-center">
-                <span>
-                    <i class="fas fa-trash mr-2"></i> Daftar Berkas Musnah
-                </span>
+        <!-- HEADER ACTION -->
+        <div class="d-sm-flex align-items-center justify-content-between mb-3">
+            <a href="{{ route('admin.musnah.index') }}"
+               class="btn btn-secondary btn-sm shadow-sm">
+                <i class="fas fa-arrow-left mr-1"></i> Kembali
+            </a>
 
-                <button type="submit"
-                        class="btn btn-light btn-sm shadow-sm"
-                        onclick="return confirm('Yakin hapus data yang dipilih?')">
-                    <i class="fas fa-trash mr-1"></i> Hapus Terpilih
-                </button>
+            <h5 class="font-weight-bold mb-0">
+                Berkas Tahun {{ $tahun }}
+            </h5>
+        </div>
+
+        <!-- CARD TABLE -->
+        <div class="card shadow border-0 mb-4">
+            <div class="card-header text-white font-weight-bold"
+                 style="background:linear-gradient(135deg,#f6d365,#fda085)">
+                <i class="fas fa-trash mr-1"></i> Daftar Berkas
             </div>
 
-            <div class="card-body table-responsive">
-                <table class="table table-hover table-bordered text-center small">
-                    <thead class="thead-light">
-                        <tr>
-                            <th width="5%">
-                                <input type="checkbox" id="checkAll">
-                            </th>
-                            <th width="5%">No</th>
-                            <th>Tanggal Musnah</th>
-                            <th>No Paspor</th>
-                            <th>Nama</th>
-                            <th>Kode Permohonan</th>
-                            <th width="10%">Aksi</th>
-                        </tr>
-                    </thead>
+            <div class="card-body">
 
-                    <tbody>
-                        @forelse ($arsips as $arsip)
-                        <tr>
-                            {{-- Checkbox --}}
-                            <td>
-                                <input type="checkbox" name="ids[]" value="{{ $arsip->id }}">
-                            </td>
+                <!-- TABLE -->
+                <div class="table-responsive">
+                    <table class="table table-hover table-bordered align-middle">
+                        <thead class="thead-light text-center">
+                            <tr>
+                                <th width="50">No</th>
+                                <th>Nama Lemari</th>
+                                <th>Jumlah Arsip</th>
+                                <th>Tanggal</th>
+                                <th width="150">Aksi</th>
+                            </tr>
+                        </thead>
 
-                            {{-- Nomor --}}
-                            <td>
-                                {{ $loop->iteration + ($arsips->currentPage() - 1) * $arsips->perPage() }}
-                            </td>
+                        <tbody class="text-center">
+                            @forelse ($arsips as $arsip)
+                                <tr>
+                                    <td>
+                                        {{ ($arsips->currentPage() - 1) * $arsips->perPage() + $loop->iteration }}
+                                    </td>
 
-                            {{-- Tanggal --}}
-                            <td>
-                                {{ $arsip->tanggal_musnah
-                                    ? \Carbon\Carbon::parse($arsip->tanggal_musnah)->format('d/m/Y H:i')
-                                    : '-' }}
-                            </td>
+                                    <td>
+                                        {{ $arsip->lemari->nama ?? '-' }}
+                                    </td>
 
-                            {{-- Data --}}
-                            <td>{{ $arsip->nomor_paspor }}</td>
-                            <td class="font-weight-bold">{{ $arsip->nama_lengkap }}</td>
-                            <td>{{ $arsip->kode_permohonan }}</td>
+                                    <td>
+                                        <span class="badge badge-primary px-3">
+                                            {{ $arsip->jumlah_arsip ?? 1 }}
+                                        </span>
+                                    </td>
 
-                            {{-- Aksi --}}
-                            <td>
-                                <a href="{{ route('admin.arsip.show', $arsip->id) }}"
-                                   class="btn btn-info btn-sm">
-                                    <i class="fas fa-eye"></i>
-                                </a>
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="7" class="text-muted py-4">
-                                <i class="fas fa-folder-open fa-2x mb-2"></i><br>
-                                Tidak ada data musnah
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                                    <td>
+                                        {{ \Carbon\Carbon::parse($arsip->created_at)->format('d/m/Y') }}
+                                    </td>
 
-                {{-- Pagination --}}
-                <div class="d-flex justify-content-center mt-3">
-                    {{ $arsips->links() }}
+                                    <td>
+                                        <div class="btn-group">
+
+                                            <!-- PREVIEW -->
+                                            <a href="{{ route('admin.musnah.pdf', $arsip->id) }}"
+                                               class="btn btn-sm btn-info shadow-sm">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+
+
+                                            <!-- DELETE -->
+                                            <form action="{{ route('admin.musnah.bulkDelete') }}"
+                                                  method="POST"
+                                                  onsubmit="return confirm('Hapus berkas ini?')">
+                                                @csrf
+                                                @method('DELETE')
+
+                                                <input type="hidden" name="ids[]" value="{{ $arsip->id }}">
+
+                                                <button class="btn btn-sm btn-danger shadow-sm">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+
+                                            <a href="{{ route('admin.musnah.download', $arsip->id) }}"
+   class="btn btn-success btn-sm">
+    <i class="fas fa-download"></i>
+</a>
+
+                                        </div>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="text-muted py-4">
+                                        <i class="fas fa-folder-open fa-2x mb-2"></i>
+                                        <br>Tidak ada data berkas
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
                 </div>
+
+                <!-- PAGINATION -->
+                <div class="mt-3">
+                    {{ $arsips->links('pagination::bootstrap-4') }}
+                </div>
+
             </div>
         </div>
-    </form>
+
+    @endif
 
 </div>
-@endsection
-
-@section('scripts')
-<script>
-    // Select All Checkbox
-    document.getElementById('checkAll').addEventListener('click', function () {
-        let checkboxes = document.querySelectorAll('input[name="ids[]"]');
-        checkboxes.forEach(cb => cb.checked = this.checked);
-    });
-</script>
 @endsection
