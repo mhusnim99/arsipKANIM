@@ -94,13 +94,11 @@ class PenerimaanArsipController extends Controller
 
             $permohonan = $snapshot['permohonan'];
 
-            // 🔹 Cari loker aktif yang masih punya slot
-            $loker = Loker::lockForUpdate()
-                ->where('status', 'aktif')
-                ->get()
-                ->first(function ($l) {
-                    return $l->jumlahArsip() < $l->kapasitas;
-                });
+            $loker = \App\Services\LokerAllocator::getAvailableLoker();
+
+            if (!$loker) {
+                throw new \Exception('Semua loker penuh');
+            }
 
             if (!$loker) {
                 throw new \Exception('Tidak ada loker aktif');
@@ -128,6 +126,10 @@ class PenerimaanArsipController extends Controller
             // 🔹 FIX: kasih fallback biar gak NULL
             $namaLengkap = $permohonan['nama_lengkap'] ?? 'Tidak diketahui';
             $nomorPaspor = $permohonan['nopaspor'] ?? '-';
+
+            if ($loker->arsips()->count() >= $loker->kapasitas) {
+                throw new \Exception('Loker sudah penuh (race condition)');
+            }
 
             // 🔹 Simpan arsip
             $arsip = Arsip::create([
@@ -182,12 +184,7 @@ class PenerimaanArsipController extends Controller
     {
         $pengiriman = PengirimanBerkas::findOrFail($id);
 
-        $loker = Loker::with('lemari', 'arsips')
-            ->where('status', 'aktif')
-            ->get()
-            ->first(function ($l) {
-                return $l->arsips()->count() < $l->kapasitas;
-            });
+        $loker = \App\Services\LokerAllocator::getAvailableLoker();
 
         if (!$loker) {
             return response()->json([
@@ -214,6 +211,10 @@ class PenerimaanArsipController extends Controller
      */
     public function tolak(Request $request, $id)
     {
+        $request->validate([
+            'alasan_penolakan' => 'required|string|max:1000'
+        ]);
+
         $pengiriman = PengirimanBerkas::findOrFail($id);
 
         if ($pengiriman->status !== 'menunggu') {
@@ -222,10 +223,12 @@ class PenerimaanArsipController extends Controller
 
         $pengiriman->update([
             'status' => 'ditolak',
-            'berita_acara_id' => null //  reset supaya bisa masuk berita acara lagi
+            'alasan_penolakan' => $request->alasan_penolakan,
+            'ditolak_pada' => now(),
+            'berita_acara_id' => null
         ]);
 
-        return back()->with('success', 'Pengiriman ditolak.');
+        return back()->with('success', 'Pengiriman berhasil ditolak.');
     }
 
     /**
@@ -270,7 +273,7 @@ class PenerimaanArsipController extends Controller
         ]);
     }
 
-        public function bulkTerima(Request $request)
+    public function bulkTerima(Request $request)
     {
         $request->validate([
             'ids' => 'required|array'
@@ -283,14 +286,10 @@ class PenerimaanArsipController extends Controller
                 ->lockForUpdate()
                 ->get();
 
-            // 🔥 ambil loker sekali saja
-            $loker = Loker::lockForUpdate()
-                ->where('status', 'aktif')
-                ->get()
-                ->first(fn($l) => $l->jumlahArsip() < $l->kapasitas);
+            $loker = \App\Services\LokerAllocator::getAvailableLoker();
 
             if (!$loker) {
-                throw new \Exception('Tidak ada loker tersedia');
+                throw new \Exception('Semua loker penuh');
             }
 
             // 🔥 HITUNG KONDISI AWAL
@@ -302,18 +301,23 @@ class PenerimaanArsipController extends Controller
 
             foreach ($pengirimanList as $pengiriman) {
 
+                // 🔹 Ambil snapshot SIMKIM
                 $snapshot = $pengiriman->simkim_snapshot;
-                $permohonan = $snapshot['permohonan'] ?? null;
 
-                if (!$permohonan) continue;
-
-                // 🔥 kalau slot penuh → pindah slot
-                if ($slotCount >= $kapasitas) {
-                    $currentSlot++;
-                    $slotCount = 0;
+                if (!$snapshot || !isset($snapshot['permohonan'])) {
+                    throw new \Exception('Snapshot SIMKIM tidak ditemukan');
                 }
 
-                // 🔥 nomor urut GLOBAL (bukan per loop DB)
+                $permohonan = $snapshot['permohonan'];
+
+                $loker = \App\Services\LokerAllocator::getAvailableLoker();
+
+                if (!$loker) {
+                    throw new \Exception('Loker habis di tengah proses');
+                }
+
+                $totalArsip = $loker->arsips()->count();
+
                 $nomorUrut = $totalArsip + 1;
 
                 $nomorArsip = sprintf(
@@ -322,6 +326,12 @@ class PenerimaanArsipController extends Controller
                     $loker->kode_loker,
                     $nomorUrut
                 );
+
+                // 🔥 VALIDASI
+                if ($totalArsip >= $loker->kapasitas) {
+                    throw new \Exception('Overflow terdeteksi');
+                }
+
 
                 $arsip = Arsip::create([
                     'pengiriman_berkas_id' => $pengiriman->id,

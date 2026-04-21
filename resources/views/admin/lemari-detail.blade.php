@@ -156,7 +156,7 @@
 
                             @php
                                 $arsipDiLoker = $loker->arsips->count();
-                                $sisaLoker = $loker->kapasitas - $arsipDiLoker;
+                                $sisaLoker = max(0, $loker->kapasitas - $arsipDiLoker);
                             @endphp
 
                                 <tr>

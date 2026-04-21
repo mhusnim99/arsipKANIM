@@ -192,9 +192,11 @@
                                                 <i class="fas fa-check mr-1"></i>Diterima
                                             </span>
                                         @else
-                                            <span class="badge badge-danger p-2">
-                                                <i class="fas fa-times mr-1"></i>Ditolak
-                                            </span>
+                                            <td>
+                                                <span class="text-danger">
+                                                    {{ $item->alasan_penolakan ?? 'Tidak ada alasan' }}
+                                                </span>
+                                            </td>
                                         @endif
                                     </td>
 

@@ -220,9 +220,14 @@
                     <div class="col-4">
                         <label>Slot</label>
                         <div id="previewSlot" class="form-control bg-light"></div>
+                        
                     </div>
                 </div>
-
+                 <div id="slotNote" class="border rounded mt-2 px-2 py-1 bg-light" style="display:none;">
+                    <small class="text-dark">
+                        Arsip akan otomatis menyebar ke slot berikutnya jika penuh
+                    </small>
+                </div>
             </div>
 
             <div class="modal-footer">
@@ -332,14 +337,11 @@ $(document).on('click','.btn-terima', function () {
         $('#previewLemari').text(d.lemari);
         $('#previewLoker').text(d.loker);
         if (selectedIds.length > 1) {
-        $('#previewSlot').html(`
-            Slot awal: <b>${d.slot}</b><br>
-            <small class="text-muted">
-                Arsip akan otomatis menyebar ke slot berikutnya jika penuh
-            </small>
-        `);
+            $('#previewSlot').html(`Slot awal: <b>${d.slot}</b>`);
+            $('#slotNote').show();
         } else {
             $('#previewSlot').text(d.slot);
+            $('#slotNote').hide();
         }
 
         $('#modalPreview').modal('show');
@@ -378,14 +380,11 @@ $('#btnBulkTerima').click(function () {
         $('#previewLemari').text(d.lemari);
         $('#previewLoker').text(d.loker);
         if (selectedIds.length > 1) {
-        $('#previewSlot').html(`
-            Slot awal: <b>${d.slot}</b><br>
-            <small class="text-muted">
-                Arsip akan otomatis menyebar ke slot berikutnya jika penuh
-            </small>
-        `);
+            $('#previewSlot').html(`Slot awal: <b>${d.slot}</b>`);
+            $('#slotNote').show();
         } else {
             $('#previewSlot').text(d.slot);
+            $('#slotNote').hide();
         }
 
         $('#modalPreview').modal('show');

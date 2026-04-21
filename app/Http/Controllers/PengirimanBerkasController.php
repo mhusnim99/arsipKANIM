@@ -216,6 +216,31 @@ class PengirimanBerkasController extends Controller
         return redirect()->route('user.pengiriman')
             ->with('success', 'Semua berkas berhasil dikirim.');
     }
+    public function berkasDitolak()
+    {
+        $pengirimanBerkas = PengirimanBerkas::where('petugas_pengirim_id', Auth::id())
+            ->where('status', 'ditolak')
+            ->latest()
+            ->paginate(10);
+
+        return view('user.berkas-ditolak', compact('pengirimanBerkas'));
+    }
+
+    public function kirimPerbaikan($id)
+    {
+        $data = PengirimanBerkas::where('petugas_pengirim_id', Auth::id())
+            ->where('status', 'ditolak')
+            ->findOrFail($id);
+
+        $data->update([
+            'status' => 'menunggu',
+            'alasan_penolakan' => null,
+            'ditolak_pada' => null
+        ]);
+
+        return redirect()->route('user.pengiriman.ditolak')
+            ->with('success', 'Berkas berhasil dikirim ulang ke admin');
+    }
 
     /* ================= RIWAYAT ================= */
 
