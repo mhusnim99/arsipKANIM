@@ -17,9 +17,9 @@ class ManajemenLokasiController extends Controller
     {
         abort_unless(Auth::user()->role === 'admin', 403);
 
-        $lemaris = Lemari::orderByRaw(
-            "CAST(SUBSTRING(kode_lemari, 2) AS UNSIGNED) ASC"
-        )->paginate(10);
+        $lemaris = Lemari::with('lokers.arsips')
+            ->orderByRaw("CAST(SUBSTRING(kode_lemari, 2) AS UNSIGNED) ASC")
+            ->paginate(10);
 
         return view('admin.manajemen-lemari', compact('lemaris'));
     }
@@ -106,7 +106,7 @@ class ManajemenLokasiController extends Controller
     {
         $request->validate([
             'nama_lemari' => 'required|string|max:100',
-            'status'      => 'required|in:aktif,nonaktif',
+            'status'      => 'required|in:aktif,penuh',
             'keterangan'  => 'nullable|string|max:500',
         ]);
 

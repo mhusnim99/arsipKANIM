@@ -88,7 +88,7 @@
 
                                 <td>
                                     <span class="badge badge-warning px-3">
-                                        {{ $lemari->jumlah_loker_terisi }} / {{ $totalLoker }}
+                                        {{ $lemari->jumlahLokerPenuh() }} / {{ $lemari->lokers->count() }}
                                     </span>
                                 </td>
 

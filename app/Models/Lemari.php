@@ -125,4 +125,13 @@ class Lemari extends Model
     {
         return ucfirst($this->status);
     }
+
+    public function jumlahLokerPenuh(): int
+    {
+        return $this->lokers
+            ->filter(function ($loker) {
+                return $loker->arsips->count() >= $loker->kapasitas;
+            })
+            ->count();
+    }
 }
