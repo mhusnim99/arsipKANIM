@@ -23,6 +23,7 @@ class CreateArsipsTable extends Migration
             // Foreign keys
             $table->foreignId('lemari_id')->constrained('lemaris')->onDelete('cascade');
             $table->foreignId('loker_id')->constrained('lokers')->onDelete('cascade');
+            $table->unsignedInteger('slot');
             $table->foreignId('petugas_pengirim_id')->nullable()->constrained('users')->onDelete('set null');
             $table->foreignId('diterima_oleh')->nullable()->constrained('users')->onDelete('set null');
 

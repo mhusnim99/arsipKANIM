@@ -111,6 +111,17 @@ class KantorUserSeeder extends Seeder
                 'updated_at' => now(),
                 'kantor' => 'Kantor Imigrasi Kelas I TPI Surabaya',
             ],
+            [
+                'name'   => 'Admin Layanan',
+                'last_name' => 'Admin Layanan',
+                'email'  => 'layanan@arsip.com',
+                'password' => Hash::make('layanan123'),
+                'role' => 'user',
+                'email_verified_at' => now(),
+                'created_at' => now(),
+                'updated_at' => now(),
+                'kantor' => 'TIKIM',
+            ],
         ];
 
         foreach ($users as $user) {

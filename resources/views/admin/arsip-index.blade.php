@@ -33,7 +33,7 @@
                         <option value="">-- Semua Status --</option>
                         <option value="tersimpan" {{ request('status') == 'tersimpan' ? 'selected' : '' }}>Tersimpan</option>
                         <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
-                        <option value="musnah" {{ request('status') == 'musnah' ? 'selected' : '' }}>Musnah</option>
+                        {{-- <option value="musnah" {{ request('status') == 'musnah' ? 'selected' : '' }}>Musnah</option> --}}
                     </select>
                 </div>
 
@@ -131,9 +131,9 @@
                                             <button class="dropdown-item btn-status" data-id="{{ $arsip->id }}" data-status="dipinjam">
                                                 <i class="fas fa-hand-holding text-warning mr-1"></i> Dipinjam
                                             </button>
-                                            <button class="dropdown-item btn-status" data-id="{{ $arsip->id }}" data-status="musnah">
+                                            {{-- <button class="dropdown-item btn-status" data-id="{{ $arsip->id }}" data-status="musnah">
                                                 <i class="fas fa-trash text-danger mr-1"></i> Musnah
-                                            </button>
+                                            </button> --}}
                                         </div>
                                     </div>
 </div>
@@ -202,7 +202,7 @@
     </div>
 </div>
 
-{{-- MODAL MUSNAH --}}
+{{-- MODAL MUSNAH
 <div class="modal fade" id="modalMusnah" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <form method="POST" id="formMusnah">
@@ -237,7 +237,7 @@
             </div>
         </form>
     </div>
-</div>
+</div> --}}
 @endsection
 
 
@@ -263,11 +263,11 @@ $(document).on('click','.btn-status',function(){
         $('#modalPinjam').modal('show');
     }
 
-    if(status === 'musnah'){
-        $('#formMusnah').attr('action',`/admin/arsip/${id}/status`);
-        setDateTimeNow('tanggal_musnah');
-        $('#modalMusnah').modal('show');
-    }
+    // if(status === 'musnah'){
+    //     $('#formMusnah').attr('action',`/admin/arsip/${id}/status`);
+    //     setDateTimeNow('tanggal_musnah');
+    //     $('#modalMusnah').modal('show');
+    // }
 });
 </script>
 @endsection

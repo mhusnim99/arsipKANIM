@@ -30,6 +30,7 @@ class Arsip extends Model
         'nomor_paspor',
         'tanggal_permohonan',
         'status_proses',
+        'slot',
     ];
 
     protected $casts = [
@@ -107,5 +108,12 @@ class Arsip extends Model
         return $this->tanggal_masuk
             ? $this->tanggal_masuk->format('d/m/Y')
             : '-';
+    }
+    public function getSlotRangeAttribute()
+    {
+        $start = ($this->slot - 1) * 10 + 1;
+        $end = $this->slot * 10;
+
+        return "{$start}-{$end}";
     }
 }

@@ -240,30 +240,65 @@
 </div>
 
 {{-- TOLAK --}}
-<div class="modal fade" id="modalTolak">
+<div class="modal fade" id="modalTolak" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered">
         <form id="formTolak" method="POST">
             @csrf
-            <div class="modal-content border-danger shadow">
+            <div class="modal-content shadow-lg border-0">
 
+                {{-- HEADER --}}
                 <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title">
-                        <i class="fas fa-times-circle mr-2"></i> Tolak Arsip
+                    <h5 class="modal-title d-flex align-items-center">
+                        <i class="fas fa-times-circle mr-2"></i>
+                        Tolak Arsip
                     </h5>
-                    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                    <button type="button" class="close text-white" data-dismiss="modal">
+                        &times;
+                    </button>
                 </div>
 
+                {{-- BODY --}}
                 <div class="modal-body">
-                    <textarea class="form-control"
-                              name="alasan_penolakan"
-                              rows="4"
-                              placeholder="Masukkan alasan penolakan..."
-                              required></textarea>
+
+                    {{-- WARNING --}}
+                    <div class="alert alert-danger small mb-3">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        Arsip yang ditolak tidak akan diproses. Pastikan alasan jelas.
+                    </div>
+
+                    {{-- INPUT --}}
+                    <div class="form-group">
+                        <label class="font-weight-semibold">
+                            Alasan Penolakan <span class="text-danger">*</span>
+                        </label>
+
+                        <textarea 
+                            class="form-control"
+                            name="alasan_penolakan"
+                            rows="4"
+                            placeholder="Contoh: Berkas tidak lengkap / data tidak valid..."
+                            required></textarea>
+
+                        <small class="form-text text-muted">
+                            Minimal jelaskan secara singkat dan jelas.
+                        </small>
+                    </div>
+
                 </div>
 
-                <div class="modal-footer">
-                    <button class="btn btn-secondary" data-dismiss="modal">Batal</button>
-                    <button class="btn btn-danger">Simpan</button>
+                {{-- FOOTER --}}
+                <div class="modal-footer justify-content-between">
+
+                    <button type="button" 
+                            class="btn btn-outline-secondary"
+                            data-dismiss="modal">
+                        <i class="fas fa-times mr-1"></i> Batal
+                    </button>
+
+                    <button type="submit" class="btn btn-danger px-4">
+                        <i class="fas fa-save mr-1"></i> Simpan Penolakan
+                    </button>
+
                 </div>
 
             </div>

@@ -21,7 +21,7 @@ class CreateLokersTable extends Migration
             $table->string('kolom', 1);
             $table->integer('baris');
 
-            $table->enum('status', ['nonaktif', 'penuh', 'aktif'])->default('aktif');
+            $table->enum('status', ['penuh', 'aktif'])->default('aktif');
 
             $table->integer('kapasitas')->default(1);
 

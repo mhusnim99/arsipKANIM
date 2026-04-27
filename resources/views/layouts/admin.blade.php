@@ -90,12 +90,15 @@
                 <span>Menerima Arsip</span>
             </a>
         </li>
+        
+    @if (auth()->user()->isAdmin())
         <li class="nav-item {{ request()->routeIs('admin.manajemen-lemari.index') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('admin.manajemen-lemari.index') }}">
                 <i class="fas fa-fw fa-archive"></i>
                 <span>Manajemen Lemari</span>
             </a>
         </li>
+    @endif
 
         <li class="nav-item {{ request()->routeIs('admin.arsip.index') ? 'active' : '' }}">
             <a class="nav-link" href="{{ route('admin.arsip.index') }}">

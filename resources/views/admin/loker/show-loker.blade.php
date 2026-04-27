@@ -141,35 +141,42 @@
                     </thead>
 
                     <tbody class="text-center">
-                        @foreach ($loker->arsips as $i => $arsip)
+                        @foreach ($loker->arsips as $arsip)
                             <tr>
-                                <td>{{ $i + 1 }}</td>
+                                {{-- Nomor urut --}}
+                                <td>{{ $loop->iteration }}</td>
 
-                                @php
-                                    $slot = ceil(($i + 1) / 10);
-                                    $start = ($slot - 1) * 10 + 1;
-                                    $end = $slot * 10;
-                                @endphp
+                                {{-- SLOT --}}
                                 <td>
-                                    <span class="badge badge-primary px-3 py-1">
-                                        Slot {{ $slot }} ({{ $start }}-{{ $end }})
-                                    </span>
+                                    @if($arsip->slot)
+                                        <span class="badge badge-primary px-3 py-1">
+                                            Slot {{ $arsip->slot }}
+                                        </span>
+                                        <div class="small text-muted">
+                                            {{ $arsip->slot_range }}
+                                        </div>
+                                    @else
+                                        <span class="text-danger small">
+                                            Slot belum tersedia
+                                        </span>
+                                    @endif
                                 </td>
 
+                                {{-- DATA ARSIP --}}
                                 <td>{{ $arsip->kode_permohonan }}</td>
                                 <td>{{ $arsip->asal_berkas }}</td>
                                 <td>{{ \Carbon\Carbon::parse($arsip->tanggal_masuk)->format('d/m/Y') }}</td>
+
+                                {{-- STATUS --}}
                                 <td>
-                                    @php
-                                        $badgeClass = match ($arsip->status) {
+                                    <span class="badge badge-{{ 
+                                        match ($arsip->status) {
                                             'tersimpan' => 'success',
                                             'dipinjam'  => 'warning',
                                             'musnah'    => 'danger',
                                             default     => 'secondary',
-                                        };
-                                    @endphp
-
-                                    <span class="badge badge-{{ $badgeClass }} px-3 py-1">
+                                        } 
+                                    }} px-3 py-1">
                                         {{ ucfirst($arsip->status) }}
                                     </span>
                                 </td>

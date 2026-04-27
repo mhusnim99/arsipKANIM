@@ -36,7 +36,7 @@
                         <div class="form-group">
                             <label class="font-weight-bold">Kode Lemari</label>
                             <input type="text"
-                                   class="form-control bg-light font-weight-bold"
+                                   class="form-control bg-light font-weight-bold text-primary"
                                    value="{{ $lemari->kode_lemari }}"
                                    readonly>
                         </div>
@@ -45,23 +45,11 @@
                     {{-- STATUS --}}
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="font-weight-bold">Status Lemari</label>
-                            <select name="status"
-                                    class="form-control @error('status') is-invalid @enderror"
-                                    required>
-                                <option value="aktif"
-                                    {{ old('status', $lemari->status) === 'aktif' ? 'selected' : '' }}>
-                                    Aktif
-                                </option>
-                                <option value="nonaktif"
-                                    {{ old('status', $lemari->status) === 'nonaktif' ? 'selected' : '' }}>
-                                    Nonaktif
-                                </option>
-                            </select>
-
-                            @error('status')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <label class="font-weight-bold">Status</label>
+                            <input type="text"
+                                   class="form-control bg-light font-weight-bold text-{{ $lemari->status === 'penuh' ? 'warning' : 'success' }}"
+                                   value="{{ $lemari->status === 'penuh' ? 'Penuh' : 'Aktif' }}"
+                                   readonly>
                         </div>
                     </div>
 

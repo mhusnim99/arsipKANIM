@@ -250,10 +250,17 @@ class PengirimanBerkasController extends Controller
 
         $query = PengirimanBerkas::where('petugas_pengirim_id', Auth::id());
 
+        // 🔹 FILTER ASAL BERKAS
+        if ($request->filled('asal_berkas')) {
+            $query->where('asal_berkas', $request->asal_berkas);
+        }
+
+        // 🔹 FILTER BULAN
         if ($request->filled('bulan')) {
             $query->whereMonth('tanggal_kirim', $request->bulan);
         }
 
+        // 🔹 FILTER TAHUN
         if ($request->filled('tahun')) {
             $query->whereYear('tanggal_kirim', $request->tahun);
         }
@@ -265,12 +272,20 @@ class PengirimanBerkasController extends Controller
 
         $riwayat = $query->latest()->paginate(10)->withQueryString();
 
+        // 🔹 DATA DROPDOWN
+        $listAsalBerkas = PengirimanBerkas::where('petugas_pengirim_id', Auth::id())
+            ->select('asal_berkas')
+            ->distinct()
+            ->orderBy('asal_berkas')
+            ->pluck('asal_berkas');
+
         return view('user.pengiriman-riwayat', compact(
             'riwayat',
             'total',
             'diterima',
             'menunggu',
-            'ditolak'
+            'ditolak',
+            'listAsalBerkas'
         ));
     }
 }

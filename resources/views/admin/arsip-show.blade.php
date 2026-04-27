@@ -94,18 +94,33 @@
                 </div>
 
                 <div class="card-body text-center py-4">
-                    <h3 class="font-weight-bold mb-1">
-                        {{ $arsip->nomor_arsip ?? '-' }}
-                    </h3>
+                <h3 class="font-weight-bold mb-2">
+                    {{ $arsip->nomor_arsip ?? '-' }}
+                </h3>
 
+                <div class="d-flex justify-content-center align-items-center flex-wrap gap-2">
 
-                    <span class="badge badge-light border px-3 py-1">
-                        Lemari / Loker / Slot
+                    {{-- Lemari --}}
+                    <span class="badge badge-primary px-3 py-2">
+                        Lemari {{ $arsip->lemari->kode_lemari }}
                     </span>
+
+                    <span class="mx-1 text-muted">/</span>
+
+                    {{-- Loker --}}
+                    <span class="badge badge-info px-3 py-2">
+                        Loker {{ $arsip->loker->kode_loker }}
+                    </span>
+
+                    <span class="mx-1 text-muted">/</span>
+
+                    {{-- Slot --}}
+                    <span class="badge badge-success px-3 py-2">
+                        Slot {{ $arsip->slot }}
+                    </span>
+
                 </div>
-
             </div>
-
 
             {{-- STATUS --}}
             <div class="card shadow-sm border-0">

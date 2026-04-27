@@ -100,13 +100,20 @@ class Lemari extends Model
 
     public function syncStatus(): void
     {
-        if ($this->status === 'nonaktif') return;
 
-        $this->status = $this->jumlahLokerTersedia() > 0
-            ? 'aktif'
-            : 'penuh';
+        {
+            $total = $this->lokers()->count();
 
-        $this->save();
+                $penuh = $this->lokers()
+                    ->where('status', 'penuh')
+                    ->count();
+
+                $this->status = ($penuh === $total && $total > 0)
+                    ? 'penuh'
+                    : 'aktif';
+
+                $this->save();
+        }
     }
 
     /* ================= DISPLAY ================= */
@@ -116,7 +123,6 @@ class Lemari extends Model
         return match ($this->status) {
             'aktif'     => 'success',
             'penuh'     => 'warning',
-            'nonaktif'  => 'secondary',
             default     => 'secondary',
         };
     }

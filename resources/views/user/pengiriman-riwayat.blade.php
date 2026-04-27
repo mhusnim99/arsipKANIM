@@ -76,14 +76,13 @@
             @if ($pengirimanMenunggu)
                 <form action="{{ route('user.berita-acara.generate') }}" method="POST">
                     @csrf
-                    <button class="btn btn-primary btn-sm">
-                        <i class="fas fa-download mr-1"></i>
-                        Download Berita Acara
+                    <button class="btn btn-primary btn-block mb-2">
+                            <i class="fas fa-download mr-1"></i> Download Berita Acara
                     </button>
                 </form>
             @elseif ($beritaAcaraTerakhir)
                 <a href="{{ route('user.berita-acara.pdf', $beritaAcaraTerakhir->id) }}"
-                   class="btn btn-primary btn-sm">
+                   class="btn btn-primary btn-block mb-2">
                     <i class="fas fa-download mr-1"></i>
                     Download Berita Acara
                 </a>
@@ -91,53 +90,81 @@
         </div>
 
         <!-- FILTER -->
-       <div class="card-body pb-0">
-    <form method="GET">
-        <div class="row align-items-end">
+       <div class="card shadow-sm border-0 mb-3">
 
-            <!-- BULAN -->
-            <div class="col-md-3">
-                <label class="small text-muted mb-1">Pilih Bulan</label>
-                <select name="bulan" class="form-control">
-                    <option value="">-- Pilih Bulan --</option>
-                    @foreach ([
-                        1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',
-                        5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',
-                        9=>'September',10=>'Oktober',11=>'November',12=>'Desember'
-                    ] as $key => $val)
-                        <option value="{{ $key }}" {{ request('bulan') == $key ? 'selected' : '' }}>
-                            {{ $val }}
-                        </option>
-                    @endforeach
-                </select>
+    {{-- HEADER --}}
+    <div class="card-header bg-white border-0 pb-0">
+        <h6 class="mb-0 font-weight-bold text-primary">
+            <i class="fas fa-filter mr-2"></i> Filter Data Arsip
+        </h6>
+        <small class="text-muted">Gunakan filter untuk mempersempit pencarian data</small>
+    </div>
+
+    {{-- BODY --}}
+    <div class="card-body pt-3">
+        <form method="GET">
+
+            <div class="form-row">
+
+                {{-- ASAL BERKAS --}}
+                <div class="form-group col-md-4">
+                    <select name="asal_berkas" class="form-control">
+                        <option value="">Semua Asal</option>
+                        @foreach ($listAsalBerkas as $asal)
+                            <option value="{{ $asal }}" 
+                                {{ request('asal_berkas') == $asal ? 'selected' : '' }}>
+                                {{ $asal }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- BULAN --}}
+                <div class="form-group col-md-3">
+                    <select name="bulan" class="form-control">
+                        <option value="">Semua Bulan</option>
+                        @foreach ([
+                            1=>'Januari',2=>'Februari',3=>'Maret',4=>'April',
+                            5=>'Mei',6=>'Juni',7=>'Juli',8=>'Agustus',
+                            9=>'September',10=>'Oktober',11=>'November',12=>'Desember'
+                        ] as $key => $val)
+                            <option value="{{ $key }}" {{ request('bulan') == $key ? 'selected' : '' }}>
+                                {{ $val }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                {{-- TAHUN --}}
+                <div class="form-group col-md-3">
+                    <select name="tahun" class="form-control">
+                        <option value="">Semua Tahun</option>
+                        @for ($i = date('Y'); $i >= 2020; $i--)
+                            <option value="{{ $i }}" {{ request('tahun') == $i ? 'selected' : '' }}>
+                                {{ $i }}
+                            </option>
+                        @endfor
+                    </select>
+                </div>
+
+                {{-- ACTION --}}
+                <div class="form-group col-md-2 d-flex align-items-end">
+                    <div class="w-100">
+                        <button class="btn btn-primary btn-block mb-2">
+                            <i class="fas fa-search mr-1"></i> Filter
+                        </button>
+
+                        <a href="{{ route('user.pengiriman-riwayat') }}" 
+                           class="btn btn-outline-secondary btn-block">
+                            Reset
+                        </a>
+                    </div>
+                </div>
+
             </div>
 
-            <!-- TAHUN -->
-            <div class="col-md-3">
-                <label class="small text-muted mb-1">Pilih Tahun</label>
-                <select name="tahun" class="form-control">
-                    <option value="">-- Pilih Tahun --</option>
-                    @for ($i = date('Y'); $i >= 2020; $i--)
-                        <option value="{{ $i }}" {{ request('tahun') == $i ? 'selected' : '' }}>
-                            {{ $i }}
-                        </option>
-                    @endfor
-                </select>
-            </div>
-
-            <!-- BUTTON -->
-            <div class="col-md-4 d-flex align-items-end">
-                <button class="btn btn-primary mr-2">
-                    <i class="fas fa-filter mr-1"></i> Filter
-                </button>
-
-                <a href="{{ route('user.pengiriman-riwayat') }}" class="btn btn-secondary">
-                    Reset
-                </a>
-            </div>
-
-        </div>
-    </form>
+        </form>
+    </div>
 </div>
 
         <div class="card-body">
@@ -152,6 +179,7 @@
                                 <th width="12%">Tanggal Kirim</th>
                                 <th width="20%">Asal Berkas</th>
                                 <th width="12%">Status</th>
+                                <th width="15%">Alasan Penolakan</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -192,14 +220,24 @@
                                                 <i class="fas fa-check mr-1"></i>Diterima
                                             </span>
                                         @else
-                                            <td>
-                                                <span class="text-danger">
-                                                    {{ $item->alasan_penolakan ?? 'Tidak ada alasan' }}
+                                                <span class="badge badge-danger p-2">
+                                                    <i class="fas fa-times mr-1"></i>Ditolak
                                                 </span>
-                                            </td>
-                                        @endif
-                                    </td>
-
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if ($item->alasan_penolakan)
+                                                <span 
+                                                    class="d-inline-block text-truncate" 
+                                                    style="max-width: 250px;" 
+                                                    title="{{ $item->alasan_penolakan }}"
+                                                >
+                                                    {{ $item->alasan_penolakan }}
+                                                </span>
+                                            @else
+                                                <span class="text-muted">-</span>
+                                            @endif
+                                        </td>
                                 </tr>
                             @endforeach
                         </tbody>
