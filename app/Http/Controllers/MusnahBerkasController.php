@@ -4,92 +4,117 @@ namespace App\Http\Controllers;
 
 use App\Models\Arsip;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
-use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Services\ArsipCsvExporter;
 
 class MusnahBerkasController extends Controller
 {
     /**
-     * INDEX
-     * - Kalau tidak ada parameter tahun → tampil folder
-     * - Kalau ada tahun → tampil isi folder
+     * ✅ LIST FOLDER + JUMLAH ARSIP
+     * (OPTIMAL - TANPA N+1 QUERY)
      */
-    public function index(Request $request)
+    public function index()
     {
-        // CEK kalau buka folder tahun
-        if ($request->tahun) {
-            return $this->showByYear($request->tahun);
-        }
-
-        // Ambil list tahun dari data arsip
-       $years = Arsip::selectRaw('YEAR(created_at) as tahun')
-    ->whereYear('created_at', '<', Carbon::now()->year)
-    ->distinct()
-    ->orderByDesc('tahun')
-    ->pluck('tahun');
+        $years = Arsip::siapMusnah()
+            ->selectRaw('YEAR(created_at) as tahun, COUNT(*) as total')
+            ->groupBy('tahun')
+            ->orderByDesc('tahun')
+            ->get();
 
         return view('admin.musnah-berkas', compact('years'));
     }
 
-    /**
-     * TAMPILKAN DATA BERDASARKAN TAHUN
-     */
-    public function showByYear($tahun)
-{
-    $arsips = Arsip::with('lemari')
-        ->whereYear('created_at', $tahun)
-
-        // 🔥 INI KUNCI NYA
-        ->whereYear('created_at', '<', Carbon::now()->year)
-
-        ->orderByDesc('created_at')
-        ->paginate(10);
-
-    return view('admin.musnah-berkas', [
-        'arsips' => $arsips,
-        'tahun' => $tahun
-    ]);
-}
-
-    /**
-     * DOWNLOAD PDF
-     */
-    public function downloadPdf($id)
+    public function downloadCsv(int $tahun)
     {
-        $arsip = Arsip::with('lemari')->findOrFail($id);
+        ini_set('max_execution_time', 0);
+        ini_set('memory_limit', '-1');
 
-        $pdf = PDF::loadView('admin.pdf.musnah', compact('arsip'));
+        $fileName = "arsip-{$tahun}.csv";
 
-        return $pdf->download('arsip-' . $arsip->id . '.pdf');
+        return response()->streamDownload(function () use ($tahun) {
+
+            while (ob_get_level()) {
+                ob_end_clean();
+            }
+
+            $handle = fopen('php://output', 'w');
+
+            fputcsv($handle, [
+                'Nomor Arsip',
+                'Kode Permohonan',
+                'Nama',
+                'Lemari',
+                'Loker',
+                'Tanggal Masuk',
+                'Status',
+            ]);
+
+            Arsip::query()
+                ->join('lokers', 'lokers.id', '=', 'arsips.loker_id')
+                ->join('lemaris', 'lemaris.id', '=', 'lokers.lemari_id')
+                ->select(
+                    'arsips.nomor_arsip',
+                    'arsips.kode_permohonan',
+                    'arsips.nama_lengkap',
+                    'lemaris.kode_lemari',
+                    'lokers.kode_loker',
+                    'arsips.created_at',
+                    'arsips.status'
+                )
+                ->whereYear('arsips.created_at', $tahun)
+                ->where('arsips.created_at', '<=', now()->subYear())
+                ->orderBy('arsips.id')
+                ->chunk(1000, function ($rows) use ($handle) {
+
+                    foreach ($rows as $row) {
+                        fputcsv($handle, [
+                            $row->nomor_arsip,
+                            $row->kode_permohonan,
+                            $row->nama_lengkap,
+                            $row->kode_lemari,
+                            $row->kode_loker,
+                            \Carbon\Carbon::parse($row->created_at)->format('d-m-Y'),
+                            $row->status,
+                        ]);
+                    }
+
+                    flush(); // 🔥 penting
+                });
+
+            fclose($handle);
+        }, $fileName);
     }
 
-    public function showPdf($id)
-{
-    $arsip = Arsip::with('lemari')->findOrFail($id);
-
-    return view('admin.pdf.musnah', compact('arsip'));
-}
     /**
-     * HAPUS DATA
-     * - Bisa hapus per item (ids[])
-     * - Bisa hapus per tahun (folder)
+     * ✅ HAPUS PER TAHUN (SCALABLE)
+     * - pakai chunk (ANTI MEMORY OVERLOAD)
+     * - auto reset loker & lemari
      */
-    public function bulkDelete(Request $request)
+    public function destroy(int $tahun)
     {
-        // HAPUS PER ITEM
-        if ($request->ids) {
-            Arsip::whereIn('id', $request->ids)->delete();
+        DB::transaction(function () use ($tahun) {
 
-            return back()->with('success', 'Data berhasil dihapus');
-        }
+            Arsip::with('loker')
+                ->siapMusnah()
+                ->whereYear('created_at', $tahun)
+                ->orderBy('id') // WAJIB untuk chunkById
+                ->chunkById(1000, function ($arsips) {
 
-        // HAPUS PER TAHUN (FOLDER)
-        if ($request->tahun) {
-            Arsip::whereYear('created_at', $request->tahun)->delete();
+                    // 🔥 ambil loker unik
+                    $lokers = $arsips->pluck('loker')->filter()->unique('id');
 
-            return back()->with('success', 'Folder berhasil dihapus');
-        }
+                    // 🔥 delete batch
+                    Arsip::whereIn('id', $arsips->pluck('id'))->delete();
 
-        return back()->with('error', 'Tidak ada data yang dipilih');
+                    // 🔥 sync ulang
+                    foreach ($lokers as $loker) {
+                        $loker->syncStatus();
+                        $loker->lemari->syncStatus();
+                    }
+                });
+        });
+
+        return back()->with('success', 'Arsip berhasil dimusnahkan');
     }
 }

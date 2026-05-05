@@ -52,13 +52,11 @@ class Loker extends Model
     {
         $jumlah = $this->arsips()->count();
 
-        if ($jumlah >= $this->kapasitas) {
-            $this->status = 'penuh';
-        } else {
-            $this->status = 'aktif';
-        }
+        $this->status = $jumlah >= $this->kapasitas
+            ? 'penuh'
+            : 'aktif';
 
-        $this->save();
+        $this->saveQuietly(); 
     }
 
     /* ================= DISPLAY ================= */
@@ -68,15 +66,15 @@ class Loker extends Model
         $this->loadMissing('lemari');
         return "{$this->kolom}{$this->baris}";
     }
-    
-    public function getStatusAttribute($value)
-    {
-        $jumlah = $this->arsips()->count();
 
-        return $jumlah >= $this->kapasitas
-            ? 'penuh'
-            : 'aktif';
-    }
+    // public function getStatusAttribute($value)
+    // {
+    //     $jumlah = $this->arsips()->count();
+
+    //     return $jumlah >= $this->kapasitas
+    //         ? 'penuh'
+    //         : 'aktif';
+    // }
 
     public function getStatusBadgeAttribute(): string
     {

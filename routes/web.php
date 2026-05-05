@@ -41,7 +41,6 @@ Route::get('/', function () {
     }
 
     return redirect()->route('login');
-
 });
 
 /*
@@ -99,17 +98,25 @@ Route::middleware('auth')->group(function () {
 
             Route::get('/', [PenerimaanArsipController::class, 'index'])->name('index');
 
-            Route::get('/{id}/preview',
-                    [PenerimaanArsipController::class,'preview']);
+            Route::get(
+                '/{id}/preview',
+                [PenerimaanArsipController::class, 'preview']
+            );
 
-            Route::post('/{id}/terima',
-                [PenerimaanArsipController::class,'terima']);
+            Route::post(
+                '/{id}/terima',
+                [PenerimaanArsipController::class, 'terima']
+            );
 
-            Route::post('/{id}/tolak',
-                [PenerimaanArsipController::class,'tolak'])->name('tolak');
+            Route::post(
+                '/{id}/tolak',
+                [PenerimaanArsipController::class, 'tolak']
+            )->name('tolak');
 
-            Route::get('/{id}/detail',
-                [PenerimaanArsipController::class,'show'])->name('detail');
+            Route::get(
+                '/{id}/detail',
+                [PenerimaanArsipController::class, 'show']
+            )->name('detail');
 
             Route::get('/lemari/{lemari}/lokers', [PenerimaanArsipController::class, 'getLokersByLemari'])
                 ->name('lokers');
@@ -134,21 +141,23 @@ Route::middleware('auth')->group(function () {
             Route::put('/{arsip}/status', [ArsipController::class, 'update'])->name('update');
 
             Route::post('/{arsip}/pinjam', [PenerimaanArsipController::class, 'pinjam'])->name('pinjam');
-
-            Route::post('/{arsip}/musnah', [PenerimaanArsipController::class, 'musnah'])->name('musnah');
-
-
         });
 
-         Route::get('/musnah', [MusnahBerkasController::class, 'index'])->name('musnah.index');
-        Route::delete('/musnah/bulk-delete', [MusnahBerkasController::class, 'bulkDelete'])->name('musnah.bulkDelete');
-        Route::get('/musnah/{id}/download', [MusnahBerkasController::class, 'downloadPdf'])->name('musnah.download');
-        Route::get('/musnah/{id}/pdf', [MusnahBerkasController::class, 'showPdf'])->name('musnah.pdf');
+        Route::prefix('musnah')->name('musnah.')->group(function () {
 
+            Route::get('/', [MusnahBerkasController::class, 'index'])
+                ->name('index');
 
+            Route::get('/download-csv/{tahun}', [MusnahBerkasController::class, 'downloadCsv'])->whereNumber('tahun')
+                ->name('download.csv');
+
+            Route::delete('/destroy/{tahun}', [MusnahBerkasController::class, 'destroy'])
+                ->whereNumber('tahun')
+                ->name('destroy');
+        });
     });
 
-        /*
+    /*
     |--------------------------------------------------------------------------
     | PETUGAS ARSIP ROUTES
     |--------------------------------------------------------------------------
@@ -168,7 +177,6 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/arsip/{arsip}', [ArsipController::class, 'show'])
             ->name('show');
-
     });
 
     /*
@@ -202,7 +210,7 @@ Route::middleware('auth')->group(function () {
             ->name('berita-acara.index');
         Route::get('/berita-acara/generate', [BeritaAcaraController::class, 'generate'])
             ->name('berita-acara.generate');
-        Route::post('/berita-acara/generate',[BeritaAcaraController::class,'generate'])
+        Route::post('/berita-acara/generate', [BeritaAcaraController::class, 'generate'])
             ->name('berita-acara.generate.post');
         Route::get('/berita-acara/{id}', [BeritaAcaraController::class, 'show'])
             ->name('berita-acara.show');

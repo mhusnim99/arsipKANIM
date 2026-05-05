@@ -116,4 +116,8 @@ class Arsip extends Model
 
         return "{$start}-{$end}";
     }
+    public function scopeSiapMusnah($query)
+    {
+        return $query->where('created_at', '<=', now()->subYear());
+    }
 }

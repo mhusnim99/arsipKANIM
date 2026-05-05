@@ -66,6 +66,11 @@
                         </tr>
 
                         <tr>
+                            <th class="bg-light">Petugas Pengirim</th>
+                            <td>{{ optional($arsip->petugasPengirim)->name ?? '-' }}</td>
+                        </tr>
+
+                        <tr>
                             <th class="bg-light">Petugas Penerima</th>
                             <td>{{ optional($arsip->petugasPenerima)->name ?? '-' }}</td>
                         </tr>

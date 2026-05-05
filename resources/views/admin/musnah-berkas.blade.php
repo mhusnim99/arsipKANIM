@@ -10,164 +10,104 @@
         </h1>
     </div>
 
-    @if (!isset($tahun))
-
-        <!-- MODE FOLDER -->
-        <div class="row">
-            @forelse ($years as $th)
-                <div class="col-md-3 mb-4">
-                    <div class="card shadow border-0 text-center p-4">
-
-                        <i class="fas fa-folder fa-3x mb-3" style="color:#f6c23e;"></i>
-
-                        <h5 class="font-weight-bold mb-2">
-                            Berkas {{ $th }}
-                        </h5>
-
-                        <p class="text-muted small mb-3">
-                            Arsip tahun {{ $th }}
-                        </p>
-
-                        <!-- BUTTON -->
-                        <a href="{{ route('admin.musnah.index', ['tahun' => $th]) }}"
-                           class="btn btn-sm shadow-sm mb-2"
-                           style="background:#1E3A8A; color:white;">
-                            <i class="fas fa-folder-open mr-1"></i> Buka
-                        </a>
-
-                        <form action="{{ route('admin.musnah.bulkDelete') }}"
-                              method="POST"
-                              onsubmit="return confirm('Hapus semua berkas tahun {{ $th }}?')">
-                            @csrf
-                            @method('DELETE')
-
-                            <input type="hidden" name="tahun" value="{{ $th }}">
-
-                            <button class="btn btn-sm btn-danger shadow-sm w-100">
-                                <i class="fas fa-trash mr-1"></i> Hapus
-                            </button>
-                        </form>
-
-                    </div>
-                </div>
-            @empty
-                <div class="col-12 text-center text-muted py-4">
-                    <i class="fas fa-folder-open fa-2x mb-2"></i>
-                    <br>Belum ada folder berkas
-                </div>
-            @endforelse
+    <!-- TABLE CARD -->
+    <div class="card shadow border-0">
+        <div class="card-header text-white font-weight-bold"
+             style="background:linear-gradient(135deg,#1E3A8A,#3B82F6)">
+            <i class="fas fa-archive mr-1"></i> Data Arsip Siap Musnah
         </div>
 
-    @else
+        <div class="card-body">
 
-        <!-- HEADER ACTION -->
-        <div class="d-sm-flex align-items-center justify-content-between mb-3">
-            <a href="{{ route('admin.musnah.index') }}"
-               class="btn btn-secondary btn-sm shadow-sm">
-                <i class="fas fa-arrow-left mr-1"></i> Kembali
-            </a>
+            <div class="table-responsive">
+                <table class="table table-bordered table-hover align-middle">
+                    
+                    <!-- HEADER -->
+                    <thead class="thead-light text-center">
+                        <tr>
+                            <th width="60">No</th>
+                            <th>Tahun</th>
+                            <th>Jumlah Arsip</th>
+                            <th width="250">Aksi</th>
+                        </tr>
+                    </thead>
 
-            <h5 class="font-weight-bold mb-0">
-                Berkas Tahun {{ $tahun }}
-            </h5>
-        </div>
+                    <!-- BODY -->
+                    <tbody class="text-center">
 
-        <!-- CARD TABLE -->
-        <div class="card shadow border-0 mb-4">
-            <div class="card-header text-white font-weight-bold"
-                 style="background:linear-gradient(135deg,#f6d365,#fda085)">
-                <i class="fas fa-trash mr-1"></i> Daftar Berkas
-            </div>
-
-            <div class="card-body">
-
-                <!-- TABLE -->
-                <div class="table-responsive">
-                    <table class="table table-hover table-bordered align-middle">
-                        <thead class="thead-light text-center">
+                        @forelse ($years as $index => $th)
                             <tr>
-                                <th width="50">No</th>
-                                <th>Nama Lemari</th>
-                                <th>Jumlah Arsip</th>
-                                <th>Tanggal</th>
-                                <th width="150">Aksi</th>
-                            </tr>
-                        </thead>
+                                <!-- NO -->
+                                <td>{{ $index + 1 }}</td>
 
-                        <tbody class="text-center">
-                            @forelse ($arsips as $arsip)
-                                <tr>
-                                    <td>
-                                        {{ ($arsips->currentPage() - 1) * $arsips->perPage() + $loop->iteration }}
-                                    </td>
+                                <!-- TAHUN -->
+                                <td>
+                                    <strong>{{ $th->tahun }}</strong>
+                                </td>
 
-                                    <td>
-                                        {{ $arsip->lemari->nama ?? '-' }}
-                                    </td>
+                                <!-- JUMLAH -->
+                                <td>
+                                    <span class="badge badge-primary px-3 py-2">
+                                        {{ number_format($th->total) }} arsip
+                                    </span>
+                                </td>
 
-                                    <td>
-                                        <span class="badge badge-primary px-3">
-                                            {{ $arsip->jumlah_arsip ?? 1 }}
-                                        </span>
-                                    </td>
+                                <!-- AKSI -->
+                                <td>
 
-                                    <td>
-                                        {{ \Carbon\Carbon::parse($arsip->created_at)->format('d/m/Y') }}
-                                    </td>
+                                    @if($th->total > 0)
 
-                                    <td>
-                                        <div class="btn-group">
+                                        <!-- DOWNLOAD -->
+                                        <div class="d-flex flex-column">
 
-                                            <!-- PREVIEW -->
-                                            <a href="{{ route('admin.musnah.pdf', $arsip->id) }}"
-                                               class="btn btn-sm btn-info shadow-sm">
-                                                <i class="fas fa-eye"></i>
+                                            <!-- PART 1 -->
+                                            <a href="{{ route('admin.musnah.download.csv', [$th->tahun]) }}"
+                                            class="btn btn-success btn-sm mb-2 w-100">
+                                                <i class="fas fa-file-csv mr-1"></i>
+                                                Download CSV
                                             </a>
-
-
-                                            <!-- DELETE -->
-                                            <form action="{{ route('admin.musnah.bulkDelete') }}"
-                                                  method="POST"
-                                                  onsubmit="return confirm('Hapus berkas ini?')">
-                                                @csrf
-                                                @method('DELETE')
-
-                                                <input type="hidden" name="ids[]" value="{{ $arsip->id }}">
-
-                                                <button class="btn btn-sm btn-danger shadow-sm">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
-
-                                            <a href="{{ route('admin.musnah.download', $arsip->id) }}"
-   class="btn btn-success btn-sm">
-    <i class="fas fa-download"></i>
-</a>
-
                                         </div>
-                                    </td>
-                                </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="5" class="text-muted py-4">
-                                        <i class="fas fa-folder-open fa-2x mb-2"></i>
-                                        <br>Tidak ada data berkas
-                                    </td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
+                                        <!-- DELETE -->
+                                        <form action="{{ route('admin.musnah.destroy', $th->tahun) }}"
+                                              method="POST"
+                                              style="display:inline-block"
+                                              onsubmit="return confirm('PERMANEN: Hapus {{ number_format($th->total) }} arsip tahun {{ $th->tahun }}?')">
+                                            @csrf
+                                            @method('DELETE')
 
-                <!-- PAGINATION -->
-                <div class="mt-3">
-                    {{ $arsips->links('pagination::bootstrap-4') }}
-                </div>
+                                            <button class="btn btn-danger btn-sm shadow-sm">
+                                                <i class="fas fa-trash"></i> Hapus
+                                            </button>
+                                        </form>
 
+                                    @else
+
+                                        <span class="badge badge-secondary">
+                                            Kosong
+                                        </span>
+
+                                    @endif
+
+                                </td>
+                            </tr>
+
+                        @empty
+
+                            <tr>
+                                <td colspan="4" class="text-muted py-4">
+                                    <i class="fas fa-folder-open fa-2x mb-2"></i>
+                                    <br>Belum ada arsip untuk dimusnahkan
+                                </td>
+                            </tr>
+
+                        @endforelse
+
+                    </tbody>
+                </table>
             </div>
-        </div>
 
-    @endif
+        </div>
+    </div>
 
 </div>
 @endsection

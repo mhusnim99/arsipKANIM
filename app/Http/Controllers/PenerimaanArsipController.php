@@ -143,7 +143,7 @@ class PenerimaanArsipController extends Controller
                 'slot'                 => $slot, // 🔥 WAJIB
                 'status'               => 'tersimpan',
                 'diterima_oleh'        => Auth::id(),
-
+                'petugas_pengirim_id'  => $pengiriman->petugas_pengirim_id,
                 'nama_lengkap'         => $namaLengkap,
                 'nomor_paspor'         => $nomorPaspor,
                 'tanggal_permohonan'   => $permohonan['tanggal_permohonan'] ?? null,
@@ -342,7 +342,7 @@ class PenerimaanArsipController extends Controller
                     'slot'                 => $slot,
                     'status'               => 'tersimpan',
                     'diterima_oleh'        => Auth::id(),
-
+                    'petugas_pengirim_id'  => $pengiriman->petugas_pengirim_id,
                     'nama_lengkap'         => $permohonan['nama_lengkap'] ?? 'Tidak diketahui',
                     'nomor_paspor'         => $permohonan['nopaspor'] ?? '-',
                     'tanggal_permohonan'   => $permohonan['tanggal_permohonan'] ?? null,
