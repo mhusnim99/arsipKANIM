@@ -79,7 +79,7 @@ class MusnahBerkasController extends Controller
                         ]);
                     }
 
-                    flush(); // 🔥 penting
+                    flush(); // penting
                 });
 
             fclose($handle);
@@ -101,13 +101,13 @@ class MusnahBerkasController extends Controller
                 ->orderBy('id') // WAJIB untuk chunkById
                 ->chunkById(1000, function ($arsips) {
 
-                    // 🔥 ambil loker unik
+                    // ambil loker unik
                     $lokers = $arsips->pluck('loker')->filter()->unique('id');
 
-                    // 🔥 delete batch
+                    // delete batch
                     Arsip::whereIn('id', $arsips->pluck('id'))->delete();
 
-                    // 🔥 sync ulang
+                    // sync ulang
                     foreach ($lokers as $loker) {
                         $loker->syncStatus();
                         $loker->lemari->syncStatus();

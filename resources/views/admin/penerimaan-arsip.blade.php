@@ -14,48 +14,90 @@
         </span>
     </div>
 
-    {{-- ================= FILTER ================= --}}
-{{-- ================= FILTER CARD ================= --}}
+
+{{-- ================= FILTER ================= --}}
 <div class="card shadow-sm border-0 mb-4">
 
+    {{-- HEADER --}}
     <div class="card-header text-white font-weight-bold"
-         style="background:linear-gradient(135deg,#38BDF8,#0EA5E9)">
-        <i class="fas fa-filter mr-1"></i> Filter Data
+         style="background: linear-gradient(135deg, #38BDF8, #0EA5E9);">
+        <i class="fas fa-filter mr-2"></i>
+        Filter Data
     </div>
 
+    {{-- BODY --}}
     <div class="card-body">
 
         <form method="GET">
-            <div class="form-row align-items-end">
 
-                <div class="col-md-4 mb-2">
-                    <label class="font-weight-bold">Petugas</label>
-                    <select name="petugas" class="form-control custom-height">
+            <div class="row align-items-end">
+
+                {{-- PETUGAS --}}
+                <div class="col-md-4 mb-3">
+                    <label class="font-weight-bold text-dark mb-2">
+                        Semua Petugas
+                    </label>
+
+                    <select name="petugas"
+                            class="form-control shadow-sm"
+                            style="height:45px; border-radius:10px; background:#F8FAFC; border:1px solid #DCE6F1;">
+
                         <option value="">Semua Petugas</option>
+
                         @foreach($petugasList as $p)
-                            <option value="{{ $p->id }}" {{ request('petugas') == $p->id ? 'selected' : '' }}>
+                            <option value="{{ $p->id }}"
+                                {{ request('petugas') == $p->id ? 'selected' : '' }}>
                                 {{ $p->name }}
                             </option>
                         @endforeach
+
                     </select>
                 </div>
 
-                <div class="col-md-8 mb-2 d-flex align-items-end" style="gap:10px;">
-                    <button class="btn btn-primary custom-height">
-                        <i class="fas fa-search mr-1"></i> Filter
-                    </button>
+                {{-- CARI ARSIP --}}
+                <div class="col-md-4 mb-3">
+                    <label class="font-weight-bold text-dark mb-2">
+                        Cari Arsip
+                    </label>
 
-                    <a href="{{ route('admin.penerimaan-arsip.index') }}"
-                       class="btn btn-outline-secondary custom-height d-flex align-items-center">
-                        Reset
-                    </a>
+                    <input type="text"
+                           name="q"
+                           class="form-control shadow-sm"
+                           placeholder="Kode permohonan / Slot"
+                           value="{{ request('q') }}"
+                           style="height:45px; border-radius:10px; background:#F8FAFC; border:1px solid #DCE6F1;">
+                </div>
+
+                {{-- BUTTON --}}
+                <div class="col-md-4 mb-3">
+
+                    <div class="d-flex" style="gap:10px;">
+
+                        <button type="submit"
+                                class="btn btn-primary shadow-sm px-4"
+                                style="height:45px; border-radius:10px; min-width:120px;">
+
+                            <i class="fas fa-search mr-1"></i>
+                            Filter
+                        </button>
+
+                        <a href="{{ route('admin.penerimaan-arsip.index') }}"
+                           class="btn btn-outline-secondary shadow-sm px-4 d-flex align-items-center justify-content-center"
+                           style="height:45px; border-radius:10px; min-width:100px;">
+
+                            <i class="fas fa-sync-alt mr-1"></i>
+                            Reset
+                        </a>
+
+                    </div>
+
                 </div>
 
             </div>
+
         </form>
 
     </div>
-
 </div>
 
     {{-- ================= TABLE CARD ================= --}}
@@ -220,7 +262,7 @@
                     <div class="col-4">
                         <label>Slot</label>
                         <div id="previewSlot" class="form-control bg-light"></div>
-                        
+
                     </div>
                 </div>
                  <div id="slotNote" class="border rounded mt-2 px-2 py-1 bg-light" style="display:none;">
@@ -272,7 +314,7 @@
                             Alasan Penolakan <span class="text-danger">*</span>
                         </label>
 
-                        <textarea 
+                        <textarea
                             class="form-control"
                             name="alasan_penolakan"
                             rows="4"
@@ -289,7 +331,7 @@
                 {{-- FOOTER --}}
                 <div class="modal-footer justify-content-between">
 
-                    <button type="button" 
+                    <button type="button"
                             class="btn btn-outline-secondary"
                             data-dismiss="modal">
                         <i class="fas fa-times mr-1"></i> Batal

@@ -3,7 +3,7 @@
 @section('main-content')
 <div class="container-fluid pb-4">
 
-    {{-- HEADER --}}
+    {{-- ================= HEADER ================= --}}
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1 class="h3 mb-0 text-gray-800 font-weight-bold">
             <i class="fas fa-folder-open text-primary mr-2"></i>
@@ -15,10 +15,9 @@
         </a>
     </div>
 
-
     <div class="row">
 
-        {{-- INFORMASI UTAMA --}}
+        {{-- ================= INFORMASI UTAMA ================= --}}
         <div class="col-lg-8 mb-4">
             <div class="card shadow-sm border-0 h-100">
 
@@ -32,7 +31,7 @@
 
                         <tr>
                             <th width="35%" class="bg-light">Kode Permohonan</th>
-                            <td class="font-weight-bold">{{ $arsip->kode_permohonan }}</td>
+                            <td class="font-weight-bold">{{ $arsip->kode_permohonan ?? '-' }}</td>
                         </tr>
 
                         <tr>
@@ -47,7 +46,7 @@
 
                         <tr>
                             <th class="bg-light">Tanggal Permohonan</th>
-                            <td>{{ optional($arsip->tanggal_permohonan)->format('d/m/Y') }}</td>
+                            <td>{{ optional($arsip->tanggal_permohonan)->format('d/m/Y') ?? '-' }}</td>
                         </tr>
 
                         <tr>
@@ -62,7 +61,7 @@
 
                         <tr>
                             <th class="bg-light">Tanggal Masuk</th>
-                            <td>{{ optional($arsip->tanggal_masuk)->format('d/m/Y') }}</td>
+                            <td>{{ optional($arsip->tanggal_masuk)->format('d/m/Y') ?? '-' }}</td>
                         </tr>
 
                         <tr>
@@ -77,17 +76,15 @@
 
                         <tr>
                             <th class="bg-light">Diterima Pada</th>
-                            <td>{{ optional($arsip->created_at)->format('d/m/Y H:i') }}</td>
+                            <td>{{ optional($arsip->created_at)->format('d/m/Y H:i') ?? '-' }}</td>
                         </tr>
 
                     </table>
                 </div>
-
             </div>
         </div>
 
-
-        {{-- LOKASI & STATUS --}}
+        {{-- ================= LOKASI & STATUS ================= --}}
         <div class="col-lg-4 mb-4">
 
             {{-- LOKASI --}}
@@ -99,56 +96,50 @@
                 </div>
 
                 <div class="card-body text-center py-4">
-                <h3 class="font-weight-bold mb-2">
-                    {{ $arsip->nomor_arsip ?? '-' }}
-                </h3>
+                    <h3 class="font-weight-bold mb-3">
+                        {{ $arsip->nomor_arsip ?? '-' }}
+                    </h3>
 
-                <div class="d-flex justify-content-center align-items-center flex-wrap gap-2">
+                    <div class="d-flex justify-content-center align-items-center flex-wrap">
 
-                    {{-- Lemari --}}
-                    <span class="badge badge-primary px-3 py-2">
-                        Lemari {{ $arsip->lemari->kode_lemari }}
-                    </span>
+                        <span class="badge badge-primary px-3 py-2">
+                            Lemari {{ optional($arsip->lemari)->kode_lemari ?? '-' }}
+                        </span>
 
-                    <span class="mx-1 text-muted">/</span>
+                        <span class="mx-2 text-muted">/</span>
 
-                    {{-- Loker --}}
-                    <span class="badge badge-info px-3 py-2">
-                        Loker {{ $arsip->loker->kode_loker }}
-                    </span>
+                        <span class="badge badge-info px-3 py-2">
+                            Loker {{ optional($arsip->loker)->kode_loker ?? '-' }}
+                        </span>
 
-                    <span class="mx-1 text-muted">/</span>
+                        <span class="mx-2 text-muted">/</span>
 
-                    {{-- Slot --}}
-                    <span class="badge badge-success px-3 py-2">
-                        Slot {{ $arsip->slot }}
-                    </span>
+                        <span class="badge badge-success px-3 py-2">
+                            Slot {{ $arsip->slot ?? '-' }}
+                        </span>
 
+                    </div>
                 </div>
             </div>
 
             {{-- STATUS --}}
             <div class="card shadow-sm border-0">
-
                 <div class="card-header bg-secondary text-white font-weight-bold">
                     <i class="fas fa-tag mr-2"></i>
                     Status Arsip
                 </div>
 
                 <div class="card-body text-center py-4">
-                    <span class="badge badge-{{ $arsip->status_badge }} px-4 py-2 shadow-sm">
-                        {{ $arsip->status_text }}
+                    <span class="badge badge-{{ $arsip->status_badge ?? 'secondary' }} px-4 py-2 shadow-sm">
+                        {{ $arsip->status_text ?? '-' }}
                     </span>
                 </div>
-
             </div>
 
         </div>
-
     </div>
 
-
-    {{-- INFO PEMINJAMAN --}}
+    {{-- ================= INFO PEMINJAMAN ================= --}}
     @if ($arsip->status === 'dipinjam')
     <div class="card border-0 shadow-sm mt-4 mb-4">
 
@@ -172,7 +163,7 @@
 
                 <tr>
                     <th class="bg-light">Tanggal & Waktu</th>
-                    <td>{{ optional($arsip->tanggal_pinjam)->format('d/m/Y H:i') }}</td>
+                    <td>{{ optional($arsip->tanggal_pinjam)->format('d/m/Y H:i') ?? '-' }}</td>
                 </tr>
 
             </table>
@@ -192,15 +183,13 @@
                     <i class="fas fa-check mr-1"></i>
                     Arsip Dikembalikan
                 </button>
-
             </form>
         </div>
 
     </div>
     @endif
 
-
-    {{-- INFO PEMUSNAHAN --}}
+    {{-- ================= INFO PEMUSNAHAN ================= --}}
     @if ($arsip->status === 'musnah')
     <div class="card border-0 shadow-sm mt-4 mb-4">
 
@@ -219,7 +208,12 @@
 
                 <tr>
                     <th class="bg-light">Tanggal & Waktu</th>
-                    <td>{{ $arsip->tanggal_musnah? \Carbon\Carbon::parse($arsip->tanggal_musnah)->format('d/m/Y H:i'): '-' }}</td>
+                    <td>
+                        {{ $arsip->tanggal_musnah
+                            ? \Carbon\Carbon::parse($arsip->tanggal_musnah)->format('d/m/Y H:i')
+                            : '-'
+                        }}
+                    </td>
                 </tr>
 
             </table>

@@ -29,14 +29,19 @@ class PenerimaanArsipController extends Controller
             ->orderByDesc('created_at');
 
         // 🔍 SEARCH (tetap dipakai)
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('kode_permohonan', 'like', "%{$search}%")
-                    ->orWhere('asal_berkas', 'like', "%{$search}%")
-                    ->orWhere('catatan', 'like', "%{$search}%");
-            });
-        }
+        // 🔍 SEARCH
+if ($request->filled('q')) {
+
+    $search = trim($request->q);
+
+    $query->where(function ($q) use ($search) {
+
+        $q->where('kode_permohonan', 'like', "%{$search}%")
+          ->orWhere('asal_berkas', 'like', "%{$search}%")
+          ->orWhere('catatan', 'like', "%{$search}%");
+
+    });
+}
 
         // 🔥 FILTER PETUGAS (FINAL)
         if ($request->filled('petugas')) {

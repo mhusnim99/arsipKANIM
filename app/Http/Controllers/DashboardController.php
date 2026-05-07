@@ -51,6 +51,23 @@ class DashboardController extends Controller
             $jumlah[] = $g->total;
         }
 
+
+        // ================= AKTIVITAS TERBARU =================
+
+$arsipTerbaru = Arsip::latest()
+    ->take(5)
+    ->get();
+
+
+// ================= ARSIP TERLAMBAT =================
+
+$arsipTerlambat = Arsip::where('status', 'dipinjam')
+    ->whereNotNull('tanggal_pinjam')
+    ->where('tanggal_pinjam', '<=', now()->subDays(3))
+    ->latest()
+    ->take(5)
+    ->get();
+
         // ================= MONITORING LOKER PENUH =================
 
         $slotPenuh = Loker::with('lemari')
@@ -81,7 +98,10 @@ class DashboardController extends Controller
             'persenPemakaian',
             'bulan',
             'jumlah',
-            'slotPenuh'
+            'slotPenuh',
+            'arsipTerbaru',
+            'arsipTerlambat'
         ));
     }
+
 }
