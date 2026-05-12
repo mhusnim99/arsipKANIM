@@ -50,10 +50,6 @@
                                 @error('kode_lemari')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-
-                                <small class="text-muted">
-                                    Contoh format: <code>L1.A1.0001</code>
-                                </small>
                             </div>
 
                             {{-- NAMA LEMARI --}}
@@ -89,12 +85,35 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+                        <div class="form-group mt-3">
+                            <label>Jumlah Loker <span class="text-danger">*</span></label>
 
-                        {{-- INFO --}}
-                        <div class="alert alert-info small border-left-info">
-                            <i class="fas fa-info-circle mr-1"></i>
-                            Sistem akan otomatis membuat <strong>30 loker</strong>
-                            dengan struktur <strong>3 kolom × 10 baris</strong>.
+                            <input type="number"
+                                name="jumlah_loker"
+                                class="form-control"
+                                min="1"
+                                max="100"
+                                value="30"
+                                required>
+
+                            <small class="text-muted">
+                                Jumlah loker yang akan dibuat otomatis
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Kapasitas per Loker</label>
+
+                            <input type="number"
+                                name="kapasitas_default_loker"
+                                class="form-control"
+                                value="350"
+                                min="1"
+                                required>
+
+                            <small class="text-muted">
+                                Jumlah maksimal arsip dalam 1 loker
+                            </small>
                         </div>
 
                         {{-- BUTTON --}}

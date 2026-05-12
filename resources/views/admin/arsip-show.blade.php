@@ -221,6 +221,65 @@
 
     </div>
     @endif
+    @if($arsip->histories->isNotEmpty())
 
+    <div class="card mt-4">
+
+        <div class="card-header bg-warning text-white">
+            <i class="fas fa-history"></i>
+            Riwayat Peminjaman Arsip
+        </div>
+
+        <div class="card-body p-0">
+
+            <table class="table table-bordered mb-0">
+
+                <thead class="bg-light">
+                    <tr>
+                        <th>No</th>
+                        <th>Peminjam</th>
+                        <th>Keperluan</th>
+                        <th>Tanggal Pinjam</th>
+                        <th>Tanggal Kembali</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach($arsip->histories as $history)
+
+                        <tr>
+                            <td>{{ $loop->iteration }}</td>
+
+                            <td>{{ $history->peminjam }}</td>
+
+                            <td>{{ $history->keperluan }}</td>
+
+                            <td>
+                                {{ optional($history->tanggal_pinjam)->format('d/m/Y H:i') }}
+                            </td>
+
+                            <td>
+                                @if($history->tanggal_kembali)
+                                    {{ $history->tanggal_kembali->format('d/m/Y H:i') }}
+                                @else
+                                    <span class="badge badge-warning">
+                                        Belum Dikembalikan
+                                    </span>
+                                @endif
+                            </td>
+                        </tr>
+
+                    @endforeach
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+    @endif
 </div>
 @endsection

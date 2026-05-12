@@ -17,11 +17,15 @@ class Lemari extends Model
         'jumlah_baris_per_kolom',
         'status',
         'keterangan',
+        'kapasitas_default_loker',
+        'jumlah_loker',
     ];
 
     protected $casts = [
         'jumlah_kolom' => 'integer',
         'jumlah_baris_per_kolom' => 'integer',
+        'kapasitas_default_loker' => 'integer',
+        'jumlah_loker' => 'integer',
     ];
 
     protected static function booted()
@@ -71,48 +75,71 @@ class Lemari extends Model
 
     /* ================= GENERATE LOKER ================= */
 
+    // public function generateLokers(): void
+    // {
+    //     if ($this->lokers()->exists()) {
+    //         return;
+    //     }
+
+    //     $koloms = range('A', chr(ord('A') + $this->jumlah_kolom - 1));
+
+    //     foreach ($koloms as $kolom) {
+    //         for ($baris = 1; $baris <= $this->jumlah_baris_per_kolom; $baris++) {
+
+    //             $kodeLoker = "{$kolom}{$baris}";
+
+    //             Loker::create([
+    //                 'lemari_id'  => $this->id,
+    //                 'kode_loker' => $kodeLoker,
+    //                 'kolom'      => $kolom,
+    //                 'baris'      => $baris,
+    //                 'kapasitas' => $this->kapasitas_default_loker,
+    //                 'status'     => 'aktif',
+    //             ]);
+    //         }
+    //     }
+    // }
     public function generateLokers(): void
     {
         if ($this->lokers()->exists()) {
             return;
         }
 
-        $koloms = range('A', chr(ord('A') + $this->jumlah_kolom - 1));
+        $jumlahPerKolom = 10;
 
-        foreach ($koloms as $kolom) {
-            for ($baris = 1; $baris <= $this->jumlah_baris_per_kolom; $baris++) {
+        for ($i = 1; $i <= $this->jumlah_loker; $i++) {
+            
+            $kolomIndex = floor(($i - 1) / $jumlahPerKolom);
+            $kolom = chr(65 + $kolomIndex);
+            $baris = (($i - 1) % $jumlahPerKolom) + 1;
+            $kodeLoker = "{$kolom}{$baris}";
 
-                $kodeLoker = "{$kolom}{$baris}";
-
-                Loker::create([
-                    'lemari_id'  => $this->id,
-                    'kode_loker' => $kodeLoker,
-                    'kolom'      => $kolom,
-                    'baris'      => $baris,
-                    'kapasitas'  => 350,
-                    'status'     => 'aktif',
-                ]);
-            }
+            Loker::create([
+                'lemari_id'  => $this->id,
+                'kode_loker' => $kodeLoker,
+                'kolom'      => $kolom,
+                'baris'      => $baris,
+                'kapasitas'  => $this->kapasitas_default_loker,
+                'status'     => 'aktif',
+            ]);
         }
     }
 
     /* ================= SYNC STATUS ================= */
 
     public function syncStatus(): void
-    {
-
-        {
+    { {
             $total = $this->lokers()->count();
 
-                $penuh = $this->lokers()
-                    ->where('status', 'penuh')
-                    ->count();
+            $penuh = $this->lokers()
+                ->where('status', 'penuh')
+                ->count();
 
-                $this->status = ($penuh === $total && $total > 0)
-                    ? 'penuh'
-                    : 'aktif';
+            $this->status = ($penuh === $total && $total > 0)
+                ? 'penuh'
+                : 'aktif';
 
-                $this->save();
+            $this->save();
         }
     }
 

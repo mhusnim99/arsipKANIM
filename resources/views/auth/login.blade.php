@@ -6,7 +6,7 @@
 
         <!-- LEFT PANEL -->
         <div class="login-left d-none d-lg-flex flex-column align-items-center justify-content-center">
-            <img src="{{ asset('img/logo_imigrasi.png') }}" alt="Logo">
+            <img src="{{ asset('img/logo_imigrasis.png') }}" alt="Logo">
             <h4 class="mt-1 login-title">SISTEM KEARSIPAN</h4>
             <p class="small mt-1">
                 Kantor Imigrasi Kelas I Khusus TPI Surabaya

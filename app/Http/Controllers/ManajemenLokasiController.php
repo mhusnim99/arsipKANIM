@@ -37,6 +37,8 @@ class ManajemenLokasiController extends Controller
         $request->validate([
             'nama_lemari' => 'required|string|max:100',
             'keterangan'  => 'nullable|string|max:500',
+            'kapasitas_default_loker' => 'required|integer|min:1',
+            'jumlah_loker' => 'required|integer|min:1|max:100',
         ]);
 
         DB::transaction(function () use ($request) {
@@ -49,6 +51,8 @@ class ManajemenLokasiController extends Controller
                 'jumlah_baris_per_kolom' => 10,
                 'keterangan' => $request->keterangan,
                 'status' => 'aktif',
+                'kapasitas_default_loker' => $request->kapasitas_default_loker,
+                'jumlah_loker' => $request->jumlah_loker,
             ]);
 
             // 🔹 Generate seluruh loker

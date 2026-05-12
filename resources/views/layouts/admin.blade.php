@@ -68,7 +68,7 @@
 
         <a class="sidebar-brand d-flex align-items-center justify-content-center py-4" href="{{ url('/home') }}">
             <div class="sidebar-brand-icon">
-                <img src="{{ asset('img/logo_imigrasi.png') }}" style="width:38px">
+                <img src="{{ asset('img/logo_imigrasis.png') }}" style="width:38px">
             </div>
             <div class="sidebar-brand-text mx-3 text-uppercase">
                 Sistem Arsiparis

@@ -10,10 +10,7 @@ use App\Services\ArsipCsvExporter;
 
 class MusnahBerkasController extends Controller
 {
-    /**
-     * ✅ LIST FOLDER + JUMLAH ARSIP
-     * (OPTIMAL - TANPA N+1 QUERY)
-     */
+
     public function index()
     {
         $years = Arsip::siapMusnah()
@@ -79,18 +76,13 @@ class MusnahBerkasController extends Controller
                         ]);
                     }
 
-                    flush(); // penting
+                    flush(); 
                 });
 
             fclose($handle);
         }, $fileName);
     }
 
-    /**
-     * ✅ HAPUS PER TAHUN (SCALABLE)
-     * - pakai chunk (ANTI MEMORY OVERLOAD)
-     * - auto reset loker & lemari
-     */
     public function destroy(int $tahun)
     {
         DB::transaction(function () use ($tahun) {
@@ -98,16 +90,14 @@ class MusnahBerkasController extends Controller
             Arsip::with('loker')
                 ->siapMusnah()
                 ->whereYear('created_at', $tahun)
-                ->orderBy('id') // WAJIB untuk chunkById
+                ->orderBy('id') 
                 ->chunkById(1000, function ($arsips) {
 
-                    // ambil loker unik
                     $lokers = $arsips->pluck('loker')->filter()->unique('id');
 
-                    // delete batch
                     Arsip::whereIn('id', $arsips->pluck('id'))->delete();
 
-                    // sync ulang
+
                     foreach ($lokers as $loker) {
                         $loker->syncStatus();
                         $loker->lemari->syncStatus();

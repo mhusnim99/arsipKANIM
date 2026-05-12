@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\HistoryPeminjamanArsip;
 
 class Arsip extends Model
 {
@@ -34,10 +36,11 @@ class Arsip extends Model
     ];
 
     protected $casts = [
-        'tanggal_masuk' => 'date',
+        'tanggal_masuk' => 'datetime',
         'created_at'    => 'datetime',
         'updated_at'    => 'datetime',
         'tanggal_permohonan' => 'date',
+        'tanggal_pinjam' => 'datetime',
     ];
 
     /* =====================
@@ -119,5 +122,9 @@ class Arsip extends Model
     public function scopeSiapMusnah($query)
     {
         return $query->where('created_at', '<=', now()->subYear());
+    }
+    public function histories(): HasMany
+    {
+        return $this->hasMany(HistoryPeminjamanArsip::class);
     }
 }
