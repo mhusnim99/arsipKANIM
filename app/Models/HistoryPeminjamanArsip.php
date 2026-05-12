@@ -8,6 +8,7 @@ class HistoryPeminjamanArsip extends Model
 {
     protected $fillable = [
         'arsip_id',
+        'kode_permohonan',
         'peminjam',
         'keperluan',
         'tanggal_pinjam',

@@ -112,6 +112,7 @@ class ArsipController extends Controller
                 // simpan history
                 HistoryPeminjamanArsip::create([
                     'arsip_id'        => $arsip->id,
+                    'kode_permohonan' => $arsip->kode_permohonan,
                     'peminjam'        => $request->dipinjam_oleh,
                     'keperluan'       => $request->keperluan,
                     'tanggal_pinjam'  => $request->tanggal_pinjam,
