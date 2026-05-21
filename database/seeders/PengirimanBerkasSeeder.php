@@ -12,21 +12,16 @@ class PengirimanBerkasSeeder extends Seeder
 {
     public function run(): void
     {
-        // Nonaktifkan foreign key check sementara
         DB::statement('SET FOREIGN_KEY_CHECKS=0');
 
-        // Kosongkan tabel dengan cara yang aman
         PengirimanBerkas::query()->delete();
 
-        // Reset auto increment
         DB::statement('ALTER TABLE pengiriman_berkas AUTO_INCREMENT = 1');
 
-        // Aktifkan kembali foreign key check
         DB::statement('SET FOREIGN_KEY_CHECKS=1');
 
         $this->command->info('✓ Tabel pengiriman_berkas berhasil dikosongkan');
 
-        // Pastikan ada user dengan role 'user' (petugas layanan)
         $petugas = User::where('role', 'user')->first();
 
         if (!$petugas) {
@@ -40,7 +35,6 @@ class PengirimanBerkasSeeder extends Seeder
         }
 
         $successCount = 0;
-        // Tampilkan statistik
         $stats = PengirimanBerkas::select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status');

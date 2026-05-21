@@ -120,8 +120,7 @@ class ArsipController extends Controller
                 ]);
             }
 
-            /*dikembalikan*/
-             else {
+            /*dikembalikan*/ else {
 
                 $arsip->update([
                     'status' => 'tersimpan',

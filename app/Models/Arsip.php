@@ -43,9 +43,7 @@ class Arsip extends Model
         'tanggal_pinjam' => 'datetime',
     ];
 
-    /* =====================
-     | RELATIONS
-     ===================== */
+    //Relasi
 
     public function pengiriman(): BelongsTo
     {
@@ -70,19 +68,12 @@ class Arsip extends Model
         return $this->belongsTo(User::class, 'diterima_oleh');
     }
 
-    /* =====================
-     | SCOPES
-     ===================== */
-
+    //Scope
     public function scopeAktif($query)
     {
         return $query->where('status', 'tersimpan');
     }
-
-    /* =====================
-     | ACCESSORS
-     ===================== */
-
+    
     public function getLokasiLengkapAttribute(): string
     {
         if ($this->lemari && $this->loker) {
@@ -121,7 +112,9 @@ class Arsip extends Model
     }
     public function scopeSiapMusnah($query)
     {
-        return $query->where('created_at', '<=', now()->subYear());
+        return $query
+            ->where('status', 'tersimpan')
+            ->whereYear('created_at', '<=', now()->year - 1);
     }
     public function histories(): HasMany
     {

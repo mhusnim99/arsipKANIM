@@ -37,6 +37,10 @@ class MusnahBerkasController extends Controller
 
             $handle = fopen('php://output', 'w');
 
+            // UTF-8 BOM agar Excel membaca karakter dengan benar
+            fprintf($handle, chr(0xEF) . chr(0xBB) . chr(0xBF));
+
+            // HEADER CSV
             fputcsv($handle, [
                 'Nomor Arsip',
                 'Kode Permohonan',
@@ -45,7 +49,7 @@ class MusnahBerkasController extends Controller
                 'Loker',
                 'Tanggal Masuk',
                 'Status',
-            ]);
+            ], ';');
 
             Arsip::query()
                 ->join('lokers', 'lokers.id', '=', 'arsips.loker_id')
@@ -59,12 +63,14 @@ class MusnahBerkasController extends Controller
                     'arsips.created_at',
                     'arsips.status'
                 )
+                ->where('arsips.status', 'tersimpan')
                 ->whereYear('arsips.created_at', $tahun)
-                ->where('arsips.created_at', '<=', now()->subYear())
                 ->orderBy('arsips.id')
+
                 ->chunk(1000, function ($rows) use ($handle) {
 
                     foreach ($rows as $row) {
+
                         fputcsv($handle, [
                             $row->nomor_arsip,
                             $row->kode_permohonan,
@@ -72,11 +78,11 @@ class MusnahBerkasController extends Controller
                             $row->kode_lemari,
                             $row->kode_loker,
                             \Carbon\Carbon::parse($row->created_at)->format('d-m-Y'),
-                            $row->status,
-                        ]);
+                            ucfirst($row->status),
+                        ], ';');
                     }
 
-                    flush(); 
+                    flush();
                 });
 
             fclose($handle);
@@ -90,7 +96,7 @@ class MusnahBerkasController extends Controller
             Arsip::with('loker')
                 ->siapMusnah()
                 ->whereYear('created_at', $tahun)
-                ->orderBy('id') 
+                ->orderBy('id')
                 ->chunkById(1000, function ($arsips) {
 
                     $lokers = $arsips->pluck('loker')->filter()->unique('id');

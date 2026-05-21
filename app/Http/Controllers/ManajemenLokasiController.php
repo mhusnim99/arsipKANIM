@@ -10,9 +10,6 @@ use Illuminate\Support\Facades\DB;
 
 class ManajemenLokasiController extends Controller
 {
-    /* =============================
-     | INDEX
-     =============================*/
     public function index(Request $request)
     {
         abort_unless(Auth::user()->role === 'admin', 403);
@@ -24,9 +21,6 @@ class ManajemenLokasiController extends Controller
         return view('admin.manajemen-lemari', compact('lemaris'));
     }
 
-    /* =============================
-     | CREATE
-     =============================*/
     public function create()
     {
         return view('admin.lemari-create');
@@ -42,10 +36,7 @@ class ManajemenLokasiController extends Controller
         ]);
 
         DB::transaction(function () use ($request) {
-
-            // 🔹 Lemari hanya struktur (BUKAN kapasitas arsip)
             $lemari = Lemari::create([
-                // 'kode_lemari' => strtoupper(trim($request->kode_lemari)),
                 'nama_lemari' => trim($request->nama_lemari),
                 'jumlah_kolom' => 3,
                 'jumlah_baris_per_kolom' => 10,
@@ -54,11 +45,7 @@ class ManajemenLokasiController extends Controller
                 'kapasitas_default_loker' => $request->kapasitas_default_loker,
                 'jumlah_loker' => $request->jumlah_loker,
             ]);
-
-            // 🔹 Generate seluruh loker
             $lemari->generateLokers();
-
-            // 🔹 Pastikan status awal konsisten
             $lemari->syncStatus();
         });
 
@@ -66,19 +53,11 @@ class ManajemenLokasiController extends Controller
             ->route('admin.manajemen-lemari.index')
             ->with('success', 'Lemari berhasil ditambahkan');
     }
-
-    /* =============================
-     | SHOW
-     =============================*/
     public function show($id)
     {
         $lemari = Lemari::with(['lokers' => function ($q) {
             $q->orderBy('kolom')->orderBy('baris');
         }])->findOrFail($id);
-
-        // ===============================
-        // HITUNG BERBASIS ARSIP (BENAR)
-        // ===============================
         $totalArsip = $lemari->arsips()->count();
         $totalKapasitas = $lemari->lokers()->sum('kapasitas');
         $sisaKapasitas = max(0, $totalKapasitas - $totalArsip);
@@ -96,9 +75,6 @@ class ManajemenLokasiController extends Controller
         ));
     }
 
-    /* =============================
-     | EDIT
-     =============================*/
     public function edit($id)
     {
         $lemari = Lemari::findOrFail($id);
@@ -118,8 +94,6 @@ class ManajemenLokasiController extends Controller
 
         DB::transaction(function () use ($lemari, $request) {
             $lemari->update($request->only('nama_lemari', 'status', 'keterangan'));
-
-            // 🔹 Sinkron ulang status berdasarkan kondisi aktual
             $lemari->syncStatus();
         });
 
@@ -128,26 +102,19 @@ class ManajemenLokasiController extends Controller
             ->with('success', 'Lemari berhasil diperbarui');
     }
 
-    /* =============================
-     | DELETE
-     =============================*/
     public function destroy($id)
     {
         $lemari = Lemari::with('arsips')->findOrFail($id);
 
-        // ❌ Tidak boleh hapus lemari yang masih berisi arsip
         if ($lemari->arsips()->exists()) {
             return back()->with('error', 'Tidak dapat menghapus lemari yang masih berisi arsip');
         }
 
-        $lemari->delete(); // cascade ke lokers
+        $lemari->delete(); 
 
         return back()->with('success', 'Lemari berhasil dihapus');
     }
 
-    /* =============================
-     | UPDATE KAPASITAS LOKER
-     =============================*/
     public function updateKapasitasLoker(Request $request, $id)
     {
         $request->validate([
@@ -158,8 +125,6 @@ class ManajemenLokasiController extends Controller
 
             $loker = Loker::findOrFail($id);
             $loker->update(['kapasitas' => $request->kapasitas]);
-
-            // 🔥 WAJIB: sinkron status
             $loker->syncStatus();
             $loker->lemari->syncStatus();
         });

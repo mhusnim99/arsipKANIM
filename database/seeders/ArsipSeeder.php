@@ -30,7 +30,6 @@ class ArsipSeeder extends Seeder
 
         foreach ($pengirimanDiterima as $index => $pengiriman) {
 
-            // ambil loker kosong
             $loker = Loker::where('lemari_id', $lemari->id)
                           ->where('status', 'kosong')
                           ->first();
@@ -40,7 +39,6 @@ class ArsipSeeder extends Seeder
                 break;
             }
 
-            // 1️⃣ BUAT ARSIP DULU
             $arsip = Arsip::create([
                 'kode_permohonan'  => $pengiriman->kode_permohonan,
                 'pengiriman_id'    => $pengiriman->id,
@@ -53,12 +51,10 @@ class ArsipSeeder extends Seeder
                 'keterangan'       => 'Arsip hasil seeding',
             ]);
 
-            // 2️⃣ BARU update pengiriman
             $pengiriman->update([
                 'arsip_id' => $arsip->id
             ]);
 
-            // 3️⃣ Update loker
             $loker->update(['status' => 'terisi']);
         }
 

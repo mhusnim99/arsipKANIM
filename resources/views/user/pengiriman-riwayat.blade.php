@@ -73,20 +73,37 @@
                     ->first();
             @endphp
 
-            @if ($pengirimanMenunggu)
-                <form action="{{ route('user.berita-acara.generate') }}" method="POST">
-                    @csrf
-                    <button class="btn btn-primary btn-block mb-2">
-                            <i class="fas fa-download mr-1"></i> Download Berita Acara
-                    </button>
-                </form>
-            @elseif ($beritaAcaraTerakhir)
-                <a href="{{ route('user.berita-acara.pdf', $beritaAcaraTerakhir->id) }}"
-                   class="btn btn-primary btn-block mb-2">
-                    <i class="fas fa-download mr-1"></i>
-                    Download Berita Acara
-                </a>
-            @endif
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+
+                @if ($pengirimanMenunggu)
+
+                    <form action="{{ route('user.berita-acara.generate') }}"
+                        method="POST"
+                        class="mb-0">
+
+                        @csrf
+
+                        <button type="submit"
+                                class="btn btn-primary shadow-sm px-4">
+                            <i class="fas fa-download mr-2"></i>
+                            Download Berita Acara
+                        </button>
+
+                    </form>
+
+                @elseif ($beritaAcaraTerakhir)
+
+                    <a href="{{ route('user.berita-acara.pdf', $beritaAcaraTerakhir->id) }}"
+                    class="btn btn-primary shadow-sm px-4">
+
+                        <i class="fas fa-download mr-2"></i>
+                        Download Berita Acara
+
+                    </a>
+
+                @endif
+
+            </div>
         </div>
 
         <!-- FILTER -->

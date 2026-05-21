@@ -134,7 +134,7 @@ td{
 <tr>
 
 <td width="90">
-<img src="{{ public_path('img/logo_imigrasi.png') }}" class="logo">
+<img src="{{ public_path('img/logo_imigrasi.jpg') }}" class="logo">
 </td>
 
 <td class="center">
@@ -178,7 +178,7 @@ BERITA ACARA SERAH TERIMA ARSIP
 
 <p>
 Kami yang bertanda tangan di bawah ini, pada hari
-<b>{{ \Carbon\Carbon::parse($beritaAcara->tanggal_dibuat)->locale('id')->translatedFormat('l') }}</b>,
+<b>{{ $beritaAcara->tanggal_dibuat->locale('id')->translatedFormat('l') }}</b>,
 tanggal
 <b>{{ \Carbon\Carbon::parse($beritaAcara->tanggal_dibuat)->locale('id')->translatedFormat('d F Y') }}</b>,
 telah melaksanakan serah terima arsip pada <b>{{ Auth::user()->kantor }}</b> oleh <b>Bidang TKIM</b> dengan keterangan sebagai berikut:

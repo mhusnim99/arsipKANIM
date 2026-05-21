@@ -70,18 +70,15 @@ class PengirimanBerkasController extends Controller
             return back()->with('error', 'Data tidak valid.');
         }
 
-        // 🔒 VALIDASI PREFIX
         $kode = $permohonan['nopermohonan'] ?? '';
         if (!$this->isKodeAllowed($kode)) {
             return back()->with('error', 'Anda hanya boleh mengirim kode dengan awalan 107.');
         }
 
-        // VALIDASI STATUS
         if (($permohonan['alurterakhir'] ?? '') !== 'SELESAI') {
             return back()->with('error', 'Data belum selesai.');
         }
 
-        // CEK DUPLIKAT
         if (PengirimanBerkas::where('kode_permohonan', $kode)
             ->whereIn('status', ['menunggu', 'diterima'])
             ->exists()
@@ -119,8 +116,6 @@ class PengirimanBerkasController extends Controller
         foreach ($kodeList as $kode) {
 
             if (empty($kode)) continue;
-
-            // 🔒 VALIDASI PREFIX
             if (!$this->isKodeAllowed($kode)) {
                 $errors[] = $kode;
                 continue;
@@ -152,7 +147,7 @@ class PengirimanBerkasController extends Controller
         }
 
         if (count($results) === 0) {
-            return back()->with('error', 'Tidak ada data valid ditemukan.');
+            return back()->with('error', 'Data sudah pernah dikirim atau tidak ditemukan. Periksa kembali data yang dimasukkan!');
         }
 
         return back()->with([
@@ -179,7 +174,6 @@ class PengirimanBerkasController extends Controller
 
             $kode = $permohonan['nopermohonan'] ?? '';
 
-            // 🔒 VALIDASI PREFIX
             if (!$this->isKodeAllowed($kode)) {
                 return back()->with(
                     'error',
@@ -249,18 +243,14 @@ class PengirimanBerkasController extends Controller
         abort_unless(Auth::user()->role === 'user', 403);
 
         $query = PengirimanBerkas::where('petugas_pengirim_id', Auth::id());
-
-        // 🔹 FILTER ASAL BERKAS
         if ($request->filled('asal_berkas')) {
             $query->where('asal_berkas', $request->asal_berkas);
         }
 
-        // 🔹 FILTER BULAN
         if ($request->filled('bulan')) {
             $query->whereMonth('tanggal_kirim', $request->bulan);
         }
 
-        // 🔹 FILTER TAHUN
         if ($request->filled('tahun')) {
             $query->whereYear('tanggal_kirim', $request->tahun);
         }
@@ -271,8 +261,6 @@ class PengirimanBerkasController extends Controller
         $ditolak = (clone $query)->where('status', 'ditolak')->count();
 
         $riwayat = $query->latest()->paginate(10)->withQueryString();
-
-        // 🔹 DATA DROPDOWN
         $listAsalBerkas = PengirimanBerkas::where('petugas_pengirim_id', Auth::id())
             ->select('asal_berkas')
             ->distinct()

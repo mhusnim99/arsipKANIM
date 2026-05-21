@@ -31,20 +31,28 @@ class Lemari extends Model
     protected static function booted()
     {
         static::creating(function ($lemari) {
+            $existingNumbers = self::pluck('kode_lemari')
+                ->map(function ($kode) {
+                    return (int) str_replace('L', '', $kode);
+                })
+                ->sort()
+                ->values()
+                ->toArray();
+            $nextNumber = 1;
 
-            $lastKode = self::orderByRaw(
-                "CAST(SUBSTRING(kode_lemari, 2) AS UNSIGNED) DESC"
-            )->value('kode_lemari');
+            foreach ($existingNumbers as $number) {
 
-            $nextNumber = $lastKode
-                ? ((int) substr($lastKode, 1)) + 1
-                : 1;
-
+                if ($number == $nextNumber) {
+                    $nextNumber++;
+                } else {
+                    break;
+                }
+            }
             $lemari->kode_lemari = 'L' . $nextNumber;
         });
     }
 
-    /* ================= RELATION ================= */
+    //Relasi
 
     public function lokers(): HasMany
     {
@@ -108,7 +116,7 @@ class Lemari extends Model
         $jumlahPerKolom = 10;
 
         for ($i = 1; $i <= $this->jumlah_loker; $i++) {
-            
+
             $kolomIndex = floor(($i - 1) / $jumlahPerKolom);
             $kolom = chr(65 + $kolomIndex);
             $baris = (($i - 1) % $jumlahPerKolom) + 1;

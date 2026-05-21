@@ -66,16 +66,7 @@ class Loker extends Model
         $this->loadMissing('lemari');
         return "{$this->kolom}{$this->baris}";
     }
-
-    // public function getStatusAttribute($value)
-    // {
-    //     $jumlah = $this->arsips()->count();
-
-    //     return $jumlah >= $this->kapasitas
-    //         ? 'penuh'
-    //         : 'aktif';
-    // }
-
+    
     public function getStatusBadgeAttribute(): string
     {
         return match ($this->status) {

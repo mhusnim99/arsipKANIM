@@ -23,11 +23,9 @@ class LokerController extends Controller
     }
 
     public function show($id)
-{
-    $loker = Loker::with(['lemari', 'arsips'])->findOrFail($id);
+    {
+        $loker = Loker::with(['lemari', 'arsips'])->findOrFail($id);
 
-    return view('admin.loker.show-loker', compact('loker'));
+        return view('admin.loker.show-loker', compact('loker'));
+    }
 }
-
-}
-

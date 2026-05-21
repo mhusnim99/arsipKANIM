@@ -12,17 +12,6 @@ return Application::configure(basePath: dirname(__DIR__))
         // health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // ========== IMPORTANT! ==========
-        // JANGAN gunakan $middleware->alias() jika pakai Kernel.php
-        // Biarkan kosong atau comment
-
-        /*
-        $middleware->alias([
-            // Jangan define di sini, gunakan Kernel.php
-        ]);
-        */
-
-        // Tapi tetap perlu define groups minimal
         $middleware->group('web', [
             \App\Http\Middleware\EncryptCookies::class,
             \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class,

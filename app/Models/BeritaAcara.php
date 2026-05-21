@@ -14,6 +14,10 @@ class BeritaAcara extends Model
         'file_path',
     ];
 
+    protected $casts = [
+        'tanggal_dibuat' => 'datetime',
+    ];
+
     public function pengirim()
     {
         return $this->belongsTo(User::class, 'petugas_pengirim_id');

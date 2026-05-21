@@ -10,10 +10,6 @@ use Barryvdh\DomPDF\Facade\Pdf;
 
 class BeritaAcaraController extends Controller
 {
-
-    /**
-     * Menampilkan daftar berita acara milik petugas
-     */
     public function index()
     {
         $beritaAcara = BeritaAcara::where('petugas_pengirim_id', Auth::id())
@@ -23,12 +19,6 @@ class BeritaAcaraController extends Controller
         return view('user.berita-acara.index', compact('beritaAcara'));
     }
 
-
-    /**
-     * Generate berita acara (VERSI BARU)
-     * Tidak mengambil data pengiriman
-     * Langsung generate PDF
-     */
     public function generate()
     {
         $user = Auth::user();
@@ -41,7 +31,7 @@ class BeritaAcaraController extends Controller
             'nomor_berita_acara' => $nomor,
             'petugas_pengirim_id' => $user->id,
             'tanggal_dibuat' => now(),
-            'jumlah_arsip' => 0 // default, bisa dikembangkan nanti
+            'jumlah_arsip' => 0
         ]);
 
         // Generate PDF
@@ -54,10 +44,6 @@ class BeritaAcaraController extends Controller
         return $pdf->download($fileName);
     }
 
-
-    /**
-     * Detail berita acara (opsional, tanpa pengiriman)
-     */
     public function show($id)
     {
         $beritaAcara = BeritaAcara::where('petugas_pengirim_id', Auth::id())
@@ -66,29 +52,27 @@ class BeritaAcaraController extends Controller
         return view('user.berita-acara.show', compact('beritaAcara'));
     }
 
-
-    /**
-     * Download ulang PDF berita acara
-     */
     public function generatePdf($id)
     {
-        $beritaAcara = BeritaAcara::where('petugas_pengirim_id', Auth::id())
-            ->findOrFail($id);
+        $beritaAcara = BeritaAcara::where(
+            'petugas_pengirim_id',
+            Auth::id()
+        )->findOrFail($id);
+
+        $beritaAcara->update([
+            'tanggal_dibuat' => now()
+        ]);
+
+        $beritaAcara->refresh();
 
         $pdf = Pdf::loadView('user.berita-acara.pdf', [
             'beritaAcara' => $beritaAcara
         ]);
 
-        $fileName = 'berita-acara-' . str_replace('/', '-', $beritaAcara->nomor_berita_acara) . '.pdf';
+        $fileName = 'berita-acara-' .
+            str_replace('/', '-', $beritaAcara->nomor_berita_acara) .
+            '.pdf';
 
-        $path = 'berita-acara/' . $fileName;
-
-        Storage::disk('public')->put($path, $pdf->output());
-
-        $beritaAcara->update([
-            'file_path' => $path
-        ]);
-
-        return response()->download(storage_path('app/public/' . $path));
+        return $pdf->download($fileName);
     }
 }

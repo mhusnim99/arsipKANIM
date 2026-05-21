@@ -13,9 +13,6 @@ use App\Services\LokerAllocator;
 
 class PenerimaanArsipController extends Controller
 {
-    /**
-     * Daftar pengiriman menunggu penerimaan
-     */
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -27,35 +24,27 @@ class PenerimaanArsipController extends Controller
         $query = PengirimanBerkas::with('petugasPengirim')
             ->where('status', 'menunggu')
             ->orderByDesc('created_at');
+        if ($request->filled('q')) {
 
-        // 🔍 SEARCH (tetap dipakai)
-        // 🔍 SEARCH
-if ($request->filled('q')) {
+            $search = trim($request->q);
 
-    $search = trim($request->q);
+            $query->where(function ($q) use ($search) {
 
-    $query->where(function ($q) use ($search) {
+                $q->where('kode_permohonan', 'like', "%{$search}%")
+                    ->orWhere('asal_berkas', 'like', "%{$search}%")
+                    ->orWhere('catatan', 'like', "%{$search}%");
+            });
+        }
 
-        $q->where('kode_permohonan', 'like', "%{$search}%")
-          ->orWhere('asal_berkas', 'like', "%{$search}%")
-          ->orWhere('catatan', 'like', "%{$search}%");
-
-    });
-}
-
-        // 🔥 FILTER PETUGAS (FINAL)
         if ($request->filled('petugas')) {
             $query->where('petugas_pengirim_id', $request->petugas);
         }
 
         $pengirimanBerkas = $query->latest()->limit(100)->get();
-
-        // 📊 Statistik
         $totalMenunggu = PengirimanBerkas::where('status', 'menunggu')->count();
         $totalDiterima = PengirimanBerkas::where('status', 'diterima')->count();
         $totalDitolak  = PengirimanBerkas::where('status', 'ditolak')->count();
 
-        // 📦 Lemari
         $lemaris = Lemari::with(['lokers' => function ($q) {
             $q->where('status', 'aktif')
                 ->orderBy('kolom')
@@ -64,7 +53,6 @@ if ($request->filled('q')) {
             ->where('status', 'aktif')
             ->get();
 
-        // 🔥 LIST PETUGAS (WAJIB)
         $petugasList = \App\Models\User::where('role', 'user')->get();
 
         return view('admin.penerimaan-arsip', compact(
@@ -84,14 +72,11 @@ if ($request->filled('q')) {
     {
         $result = DB::transaction(function () use ($id) {
 
-            // 🔒 Lock pengiriman
             $pengiriman = PengirimanBerkas::lockForUpdate()->findOrFail($id);
 
             if ($pengiriman->status !== 'menunggu') {
                 throw new \Exception('Berkas sudah diproses');
             }
-
-            // 🔹 Ambil snapshot
             $snapshot = $pengiriman->simkim_snapshot;
 
             if (!$snapshot || !isset($snapshot['permohonan'])) {
@@ -99,21 +84,17 @@ if ($request->filled('q')) {
             }
 
             $permohonan = $snapshot['permohonan'];
-
-            // 🔹 Ambil loker tersedia (SUDAH handle urutan A1 → C10)
             $loker = \App\Services\LokerAllocator::getAvailableLoker();
 
             if (!$loker) {
                 throw new \Exception('Semua loker penuh');
             }
 
-            // 🔒 Lock arsip dalam loker (hindari race condition)
             $lastArsip = Arsip::where('loker_id', $loker->id)
                 ->lockForUpdate()
                 ->orderByDesc('id')
                 ->first();
 
-            // 🔹 Generate nomor urut
             $nomorUrut = $lastArsip
                 ? ((int) substr($lastArsip->nomor_arsip, -4)) + 1
                 : 1;
@@ -121,22 +102,16 @@ if ($request->filled('q')) {
             $nomorFormatted = str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
 
             $nomorArsip = "{$loker->lemari->kode_lemari}.{$loker->kode_loker}.{$nomorFormatted}";
-
-            // 🔹 VALIDASI kapasitas (double safety)
             $totalArsip = Arsip::where('loker_id', $loker->id)->count();
 
             if ($totalArsip >= $loker->kapasitas) {
                 throw new \Exception('Loker sudah penuh (race condition)');
             }
 
-            // 🔥 HITUNG SLOT (FINAL LOGIC)
             $slot = ceil(($totalArsip + 1) / 10);
-
-            // 🔹 Fallback data
             $namaLengkap = $permohonan['nama_lengkap'] ?? 'Tidak diketahui';
             $nomorPaspor = $permohonan['nopaspor'] ?? '-';
 
-            // 🔹 Simpan arsip
             $arsip = Arsip::create([
                 'pengiriman_berkas_id' => $pengiriman->id,
                 'kode_permohonan'      => $permohonan['nopermohonan'],
@@ -145,7 +120,7 @@ if ($request->filled('q')) {
                 'asal_berkas'          => $pengiriman->asal_berkas,
                 'lemari_id'            => $loker->lemari_id,
                 'loker_id'             => $loker->id,
-                'slot'                 => $slot, // 🔥 WAJIB
+                'slot'                 => $slot, 
                 'status'               => 'tersimpan',
                 'diterima_oleh'        => Auth::id(),
                 'petugas_pengirim_id'  => $pengiriman->petugas_pengirim_id,
@@ -156,11 +131,8 @@ if ($request->filled('q')) {
                 'keterangan'           => null,
             ]);
 
-            // 🔹 Sync status
             $loker->syncStatus();
             $loker->lemari->syncStatus();
-
-            // 🔹 Update pengiriman
             $pengiriman->update([
                 'status'      => 'diterima',
                 'arsip_id'    => $arsip->id,
@@ -181,9 +153,6 @@ if ($request->filled('q')) {
             'data'    => $result,
         ]);
     }
-
-
-
 
     public function preview($id)
     {
@@ -211,6 +180,7 @@ if ($request->filled('q')) {
             ]
         ]);
     }
+
     /**
      * Tolak arsip
      */
@@ -292,8 +262,6 @@ if ($request->filled('q')) {
                 ->get();
 
             foreach ($pengirimanList as $pengiriman) {
-
-                // 🔹 Ambil snapshot
                 $snapshot = $pengiriman->simkim_snapshot;
 
                 if (!$snapshot || !isset($snapshot['permohonan'])) {
@@ -301,15 +269,11 @@ if ($request->filled('q')) {
                 }
 
                 $permohonan = $snapshot['permohonan'];
-
-                // 🔥 AMBIL LOKER SETIAP ITERASI
                 $loker = \App\Services\LokerAllocator::getAvailableLoker();
 
                 if (!$loker) {
                     throw new \Exception('Loker habis di tengah proses');
                 }
-
-                // 🔒 LOCK arsip terakhir (ANTI RACE CONDITION)
                 $lastArsip = Arsip::where('loker_id', $loker->id)
                     ->orderByDesc('id')
                     ->lockForUpdate()
@@ -325,17 +289,12 @@ if ($request->filled('q')) {
                 $nomorFormatted = str_pad($nomorUrut, 4, '0', STR_PAD_LEFT);
 
                 $nomorArsip = "{$loker->lemari->kode_lemari}.{$loker->kode_loker}.{$nomorFormatted}";
-
-                // 🔥 VALIDASI KAPASITAS (WAJIB)
                 if ($loker->arsips()->count() >= $loker->kapasitas) {
                     throw new \Exception('Loker penuh (race condition)');
                 }
-
-                // 🔥 HITUNG SLOT (FINAL FIX)
                 $totalArsip = Arsip::where('loker_id', $loker->id)->count();
                 $slot = ceil(($totalArsip + 1) / 10);
 
-                // 🔹 Simpan arsip
                 $arsip = Arsip::create([
                     'pengiriman_berkas_id' => $pengiriman->id,
                     'kode_permohonan'      => $permohonan['nopermohonan'],
@@ -354,11 +313,9 @@ if ($request->filled('q')) {
                     'status_proses'        => $permohonan['alurterakhir'] ?? null,
                 ]);
 
-                // 🔹 Sync status (PENTING)
                 $loker->syncStatus();
                 $loker->lemari->syncStatus();
 
-                // 🔹 Update pengiriman
                 $pengiriman->update([
                     'status'      => 'diterima',
                     'arsip_id'    => $arsip->id,
